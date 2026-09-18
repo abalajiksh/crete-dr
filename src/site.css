@@ -1,0 +1,102 @@
+/* Light / dark shell.
+   Ported from the design's theme-toggle.js, which set these as inline custom
+   properties on <html>. Here they are plain CSS keyed off the `data-theme`
+   attribute that app.html stamps before first paint, so the correct theme is
+   painted once with no flash and no script in the critical path.
+
+   Only the design-system tokens whose ROLE inverts on a dark ground are
+   overridden. The accent hue, the type and the geometry are untouched — a dark
+   crête is the same system on a different ground, not a second design. */
+
+:root,
+:root[data-theme='light'] {
+	--poster-ink: #f8f4f4;
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	--color-bg: #1a1918;
+	--color-surface: #262423;
+	--color-text: #f3f2f2;
+	--color-divider: color-mix(in srgb, #f3f2f2 38%, transparent);
+
+	/* The neutral ramp inverts: 100 is the tinted fill nearest the ground and
+	   900 the deepest contrast, so on a dark ground those two swap ends. */
+	--color-neutral-100: #302d2d;
+	--color-neutral-700: #a8a4a4;
+	--color-neutral-800: #c9c5c5;
+	--color-neutral-900: #0e0d0d;
+
+	/* The accent's deep steps carry paragraph-size text on a light ground; on a
+	   dark one that role moves to the light steps for the same contrast. */
+	--color-accent-100: #4d170e;
+	--color-accent-700: #ff9783;
+	--color-accent-800: #ffc4b8;
+
+	--poster-ink: #f8f4f4;
+	color-scheme: dark;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+
+html {
+	background: var(--color-bg);
+}
+
+body {
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+a {
+	color: var(--color-accent-700);
+}
+
+a:hover {
+	color: var(--color-accent);
+}
+
+/* The one place a rounded corner would creep in: the browser's own focus ring.
+   The system's ring is a 2px accent outline, square like everything else. */
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+code,
+pre,
+.mono {
+	font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+code {
+	font-size: 0.92em;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	text-wrap: balance;
+}
+
+p {
+	text-wrap: pretty;
+}
+
+/* Skip link — the nav is sticky and holds seven targets before the content. */
+.skip {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 100;
+	background: var(--color-accent);
+	color: var(--poster-ink);
+	padding: 12px 16px;
+	font-weight: 600;
+}
+
+.skip:focus {
+	left: 0;
+}
