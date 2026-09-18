@@ -1,0 +1,15 @@
+{
+	// Static-assets-only Worker: there is no `main`, so no Worker script runs.
+	// Cloudflare serves the prerendered files in ./build directly from its edge,
+	// which is what `wrangler deploy` needs in order to know what to upload.
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "crete-web",
+	"compatibility_date": "2026-09-18",
+	"assets": {
+		"directory": "./build",
+		// adapter-static writes build/404.html as its fallback. Serve that for an
+		// unmatched path rather than the SPA shell — every real route is
+		// prerendered, so a miss genuinely is a miss.
+		"not_found_handling": "404-page"
+	}
+}

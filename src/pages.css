@@ -1,0 +1,409 @@
+/* Layout utilities shared by the content pages.
+   The design files carry their layout as inline styles on every element; these
+   are the same values, named once. Page-specific styling stays in the page
+   component's own scoped <style>. Every value here comes from an app.css token
+   or from the design's own measurements — no new scale is invented. */
+
+/* ── Page frame ───────────────────────────────────────────────────────── */
+
+.wrap {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 0 24px;
+}
+
+.shell {
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-body);
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.shell main {
+	flex: 1;
+}
+
+/* A major band. The 2px rule between sections is the system's main organising
+   device — it is not decoration and must not be softened to a hairline. */
+.section {
+	padding: 64px 0;
+	border-bottom: 2px solid var(--color-divider);
+}
+
+/* The footer draws its own 2px top rule, so the last band in the page body must
+   not draw one too — the design file's own markup lands them adjacent, which
+   reads as a single 4px rule rather than the system's 2px. Scoped to a direct
+   child of .wrap so a page ending in the poster band (which carries no rule)
+   leaves every section above it ruled, as the design has it. */
+.wrap > .section:last-child {
+	border-bottom: none;
+}
+
+/* ── Type ─────────────────────────────────────────────────────────────── */
+
+/* The numbered section label: "01 — What it is for". */
+.kicker {
+	font-size: 11px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--color-accent-700);
+	margin: 0 0 16px;
+}
+
+.hero-title {
+	font-size: clamp(52px, 8vw, 104px);
+	line-height: 0.94;
+	letter-spacing: -0.03em;
+	margin: 0 0 24px;
+	max-width: 15ch;
+}
+
+.page-title {
+	font-size: clamp(38px, 5.5vw, 68px);
+	line-height: 1.02;
+	letter-spacing: -0.02em;
+	margin: 0 0 20px;
+	max-width: 20ch;
+}
+
+.lede {
+	font-size: 21px;
+	line-height: 1.45;
+	max-width: 58ch;
+	margin: 0 0 32px;
+}
+
+.measure {
+	max-width: 52ch;
+}
+
+.note {
+	font-size: 14px;
+	color: var(--color-neutral-800);
+}
+
+.dim {
+	color: var(--color-neutral-700);
+}
+
+/* ── Grids ────────────────────────────────────────────────────────────── */
+
+.cols {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 48px;
+}
+
+.cols-tight {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 48px;
+	align-items: start;
+}
+
+.figures {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 24px;
+}
+
+.tagrow {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.btnrow {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+/* ── The ruled list ───────────────────────────────────────────────────── */
+
+/* A stack of items separated by rules: 2px to open and close the run, 1px
+   between. Used for the limitation lists, the DR bands and the feature notes. */
+.rows > * {
+	border-top: 1px solid var(--color-divider);
+	padding: 14px 0;
+}
+
+.rows > *:first-child {
+	border-top-width: 2px;
+}
+
+.rows {
+	border-bottom: 2px solid var(--color-divider);
+}
+
+/* A heading inside a ruled list is a list item's label, not a page heading —
+   it takes the list's own size whatever level the document structure needs. */
+.rows h3,
+.rows h4,
+.rows strong {
+	font-size: 14px;
+}
+
+.rows h3,
+.rows h4 {
+	margin: 0 0 4px;
+	font-family: var(--font-heading);
+	font-weight: var(--font-heading-weight);
+}
+
+.rows p {
+	margin: 2px 0 0;
+	font-size: 14px;
+	color: var(--color-neutral-800);
+}
+
+/* ── The statistics band ──────────────────────────────────────────────── */
+
+.stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	border-top: 2px solid var(--color-divider);
+	border-bottom: 2px solid var(--color-divider);
+}
+
+.stat {
+	padding: 28px 24px;
+	border-right: 2px solid var(--color-divider);
+}
+
+.stat:first-child {
+	padding-left: 0;
+}
+
+.stat:last-child {
+	border-right: none;
+	padding-right: 0;
+}
+
+.stat-num {
+	font-family: var(--font-heading);
+	font-weight: var(--font-heading-weight);
+	font-size: 38px;
+	line-height: 1;
+}
+
+.stat-num.accent {
+	color: var(--color-accent);
+}
+
+.stat-label {
+	font-size: 12px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--color-neutral-700);
+	margin-top: 6px;
+}
+
+/* ── Code ─────────────────────────────────────────────────────────────── */
+
+/* Terminal output prints on the deepest neutral in both themes — it is a
+   transcript of a black terminal, not a themed surface. */
+pre.term {
+	margin: 0;
+	background: var(--color-neutral-900);
+	color: var(--color-neutral-200);
+	padding: 22px;
+	font-size: 12.5px;
+	line-height: 1.7;
+	overflow-x: auto;
+}
+
+:root[data-theme='dark'] pre.term {
+	border: 2px solid var(--color-divider);
+}
+
+pre.term .comment {
+	color: var(--color-neutral-500);
+}
+
+/* ── The poster statement ─────────────────────────────────────────────── */
+
+/* The one place the accent runs as a full field. Type stays display-grade and
+   the accent carries the page — see the design system's "Do" notes. */
+.poster {
+	background: var(--color-accent);
+	color: var(--poster-ink);
+	padding: clamp(40px, 6vw, 88px);
+}
+
+.poster .kicker {
+	color: inherit;
+	opacity: 0.85;
+}
+
+.poster h2 {
+	font-size: clamp(34px, 5.4vw, 68px);
+	line-height: 1;
+	letter-spacing: -0.02em;
+	margin: 0 0 24px;
+	max-width: 24ch;
+}
+
+.poster p {
+	max-width: 56ch;
+	font-size: 17px;
+	margin: 0 0 28px;
+}
+
+.poster .btn {
+	background: var(--poster-ink);
+	color: var(--color-accent);
+}
+
+/* ── Tables ───────────────────────────────────────────────────────────── */
+
+/* The system's .table is already themed; these only add the horizontal scroll
+   a wide specification table needs on a phone. */
+.scroll-x {
+	overflow-x: auto;
+}
+
+.scroll-x .table {
+	min-width: 640px;
+}
+
+@media (max-width: 720px) {
+	.section {
+		padding: 48px 0;
+	}
+
+	.stat,
+	.stat:first-child,
+	.stat:last-child {
+		padding: 20px 0;
+		border-right: none;
+		border-top: 1px solid var(--color-divider);
+	}
+
+	.stats > .stat:first-child {
+		border-top: none;
+	}
+}
+
+/* ── Inner-page header ────────────────────────────────────────────────── */
+
+.page-head {
+	padding: 64px 0 40px;
+}
+
+.page-head .kicker {
+	margin-bottom: 16px;
+}
+
+.page-head h1 {
+	font-size: clamp(42px, 6.4vw, 82px);
+	line-height: 0.96;
+	letter-spacing: -0.025em;
+	margin: 0 0 24px;
+	max-width: 20ch;
+}
+
+.page-head .lede {
+	font-size: 19px;
+	line-height: 1.5;
+	max-width: 60ch;
+	margin: 0;
+}
+
+/* The inner pages open on a statistics band rather than the home page's, which
+   sits inside the content flow — this one rules top and bottom and has no
+   vertical padding of its own. */
+.stats.band {
+	padding: 0;
+}
+
+.stats.band .stat {
+	padding: 26px 24px;
+}
+
+.stats.band .stat-num {
+	font-size: 34px;
+}
+
+.stats.band .stat-label {
+	font-size: 11px;
+}
+
+/* ── The numbered step strip ──────────────────────────────────────────── */
+
+/* Ruled against --color-text rather than the divider: this is a process, and
+   the heavier rule is what makes it read as one run of cells. */
+.steps {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+	gap: 2px;
+}
+
+.steps > * {
+	border-top: 2px solid var(--color-text);
+	padding: 16px;
+}
+
+.steps > *:first-child {
+	padding-left: 0;
+}
+
+.steps > *:last-child {
+	padding-right: 0;
+}
+
+.step-num {
+	font-family: var(--font-heading);
+	font-weight: var(--font-heading-weight);
+	font-size: 13px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--color-accent-700);
+	margin-bottom: 8px;
+}
+
+.steps p {
+	margin: 0;
+	font-size: 14px;
+}
+
+/* ── A compact comparison table ───────────────────────────────────────── */
+
+/* Used for the before/after and A/B figures. Narrower than .table and always
+   flush left, with the changed column carrying the accent. */
+.ab {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 14px;
+}
+
+.ab th {
+	text-align: left;
+	font-size: 11px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--color-text) 60%, transparent);
+	padding: 8px 12px 8px 0;
+	border-bottom: 2px solid var(--color-divider);
+}
+
+.ab td {
+	padding: 8px 12px 8px 0;
+	border-bottom: 1px solid var(--color-divider);
+}
+
+.ab tr:last-child td {
+	border-bottom: 2px solid var(--color-divider);
+}
+
+.ab .num {
+	font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+.ab .after {
+	color: var(--color-accent-700);
+	font-weight: 600;
+}
