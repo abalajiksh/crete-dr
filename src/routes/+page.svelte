@@ -213,6 +213,7 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 		<div class="figures">
 			{#each shots as s (s.id)}
 				<Figure
+					wide={s.wide}
 					src={s.src}
 					placeholder={s.placeholder}
 					caption={s.caption}
@@ -377,6 +378,15 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 
 	.limits-btn {
 		margin-top: 8px;
+	}
+
+	/* Two app views share the row; the DSD strip is a band and takes its own. */
+	.figures {
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	}
+
+	.figures :global(figure.wide) {
+		grid-column: 1 / -1;
 	}
 
 	.poster-wrap {

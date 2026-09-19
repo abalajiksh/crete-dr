@@ -163,10 +163,14 @@ export const shots = [
 	},
 	{
 		id: 'gui-dsd',
+		// Cropped to the strip rather than the whole window: at figure size the
+		// strip is the subject, and the rest of that screen is an empty drop target.
+		// Its band shape is why it spans the figure grid instead of sharing a cell.
+		wide: true,
 		src: '/screenshots/gui-dsd.webp',
 		width: 1600,
-		height: 1118,
-		alt: 'The DSD strip, shown only for DSD sources: chain (multistage or direct), filter (default, firls or kaiser) and output rate (44.1 to 352.8 kHz), with the shipping defaults selected.',
+		height: 598,
+		alt: 'The DSD strip, shown only for DSD sources: chain (multistage or direct), filter (default, firls or kaiser) and output rate (44.1 to 352.8 kHz), with the shipping defaults \u2014 multistage, default, 44.1 kHz \u2014 selected. Below it, the empty drop target listing the accepted formats.',
 		placeholder: '0.14.0 GUI \u2014 DSD strip',
 		caption: 'DSD strip: chain, filter, output rate.'
 	}

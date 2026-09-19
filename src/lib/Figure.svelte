@@ -6,12 +6,12 @@
 	 * and adding one needs no change here.
 	 *
 	 * @type {{ src: string | null, placeholder: string, caption: string,
-	 *          alt?: string, width?: number, height?: number }}
+	 *          alt?: string, width?: number, height?: number, wide?: boolean }}
 	 */
-	let { src, placeholder, caption, alt, width, height } = $props();
+	let { src, placeholder, caption, alt, width, height, wide = false } = $props();
 </script>
 
-<figure>
+<figure class:wide>
 	<div class="frame">
 		{#if src}
 			<img {src} alt={alt ?? caption} {width} {height} loading="lazy" decoding="async" />
