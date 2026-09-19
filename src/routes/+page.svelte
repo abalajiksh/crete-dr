@@ -208,6 +208,13 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 						the app.
 					</p>
 				</div>
+				<div>
+					<strong>Codec profile</strong>
+					<p>
+						Where a stream declares one, the detail panel names it — and an immersive carrier says
+						which bed the numbers describe. SACD images are CLI-only.
+					</p>
+				</div>
 			</div>
 		</div>
 		<div class="figures">

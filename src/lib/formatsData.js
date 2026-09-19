@@ -31,8 +31,19 @@ export const native = [
 		ext: ['.dff'],
 		note: 'Philips DSDIFF, MSB-first. Same decode engine; gated against DSF sample-for-sample.'
 	},
+	{
+		name: 'SACD disc image',
+		ext: ['.iso'],
+		note: 'Scarlet Book. Both areas read from the disc TOC, DSD and DST — and dispatched by content, not by extension.'
+	},
 	{ name: 'Cue sheet', ext: ['.cue'], note: 'Splits a monolithic file into per-track results.' }
 ];
+
+/** The SACD area selector. Not a DSD axis — it picks which recording to decode. */
+export const sacdArea = {
+	flag: '--sacd-area auto | stereo | multichannel',
+	text: '`auto` (default) prefers the 2-channel area: it is the layer crête’s DR references are built on, the layer comparable with every other release of an album, and usually the uncompressed one. A disc with no multichannel area refuses `multichannel` by name rather than quietly falling back.'
+};
 
 /** The opt-in FFmpeg tier: only what crête does not own. */
 export const ffmpeg = [
@@ -49,13 +60,17 @@ export const ffmpeg = [
 	{
 		name: 'TrueHD / MLP',
 		ext: ['.mkv', '.thd'],
-		note: 'Lossless disc audio up to 7.1. Channel bed only.'
+		note: 'Lossless disc audio up to 7.1. Channel bed only — an Atmos carrier reports `Dolby TrueHD + Dolby Atmos` and marks the layout as a bed.'
 	},
-	{ name: 'DTS / DTS-HD MA', ext: ['.mkv', '.dts'], note: 'Core plus the lossless MA extension.' },
+	{
+		name: 'DTS / DTS-HD MA',
+		ext: ['.mkv', '.dts'],
+		note: 'Core plus the lossless MA extension. The profile is reported without a bed qualifier — there is nothing unrendered about plain DTS-HD MA.'
+	},
 	{
 		name: 'E-AC-3 / AC-3',
 		ext: ['.mkv', '.eac3', '.ac3'],
-		note: 'Lossy disc audio. Channel bed only.'
+		note: 'Lossy disc audio. Channel bed only; the E-AC-3 5.1 core is what a JOC Atmos stream decodes to.'
 	}
 ];
 
@@ -77,6 +92,8 @@ export const dsdAxes = [
 
 /** Build targets, as the Makefile defines them. */
 export const buildCmds = [
+	{ cmd: 'make setup-deps-check', note: 'report what is missing' },
+	{ cmd: 'make setup-deps', note: 'install it' },
 	{ cmd: 'make', note: 'zero-dep CLI' },
 	{ cmd: 'make cli-json', note: '+ JSON output' },
 	{ cmd: 'make cli-json-ffmpeg', note: '+ FFmpeg tier' },

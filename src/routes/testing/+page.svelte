@@ -197,10 +197,11 @@
 
 	<section class="section">
 		<p class="kicker">05 — Forensics</p>
-		<h2>Four more defects the pipeline found</h2>
+		<h2>Five more defects, and what caught each one</h2>
 		<p class="intro">
-			Each of these passed every gate at the time it was found. They were caught by reading the
-			deltas underneath a green run.
+			Each of these passed every gate at the time it was found. Most were caught by reading the
+			deltas underneath a green run — and one was caught by a synthetic, because the corpus does not
+			contain the case at all.
 		</p>
 
 		<article class="case">
@@ -314,6 +315,66 @@
 				Net signed bias over integer DR mismatches went +9 → <strong>0</strong>. The "always reads
 				high" signature, open since an earlier fix, is gone. Zero non-DR metrics moved anywhere in
 				the run.
+			</p>
+		</article>
+
+		<article class="case">
+			<p class="case-tag">0.15.0</p>
+			<h3>The corpus could not have found this one</h3>
+			<div class="cols-tight">
+				<div>
+					<p class="measure">
+						The joint <em>sample</em> peak has skipped unscored channels since 0.12.0. The loop
+						behind the joint <em>true</em> peak had no such guard, so the two were computed over
+						different channel sets on every multichannel file, and <code>--dr-lfe</code> reached one
+						of them and not the other. PLR, which divides one by the other, mixed an LFE-inclusive
+						numerator with an LFE-excluded denominator.
+					</p>
+					<p class="measure">
+						True peak is ≥ sample peak by definition and the excess is inter-sample overshoot — a few
+						tenths of a dB. A 17 dB gap is not a reading anyone can interpret, and that is what a
+						synthetic 5.1 produced the moment one was built for it.
+					</p>
+					<p class="measure">
+						<strong>No corpus file could have shown it.</strong> The LFE has to be the loudest
+						channel, and in real material it never is: on the 5.1 master used to check the fix, the
+						LFE sits at −11.14 against front left at −1.67. Both invariants were then measured
+						whole-JSON on all six carriers of that disc — <code>--dr-lfe include</code> reproduces
+						0.14.0 exactly, 6/6, because the old behaviour <em>was</em> unconditional inclusion; and
+						at the default setting nothing moved either, 6/6. That is not "the bug did not matter".
+						It means the corpus never contained the case.
+					</p>
+				</div>
+				<div>
+					<table class="ab">
+						<thead>
+							<tr>
+								<th>Synthetic 5.1 · all channels −20 dBFS, LFE −3</th><th>0.14.0</th><th>0.15.0</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Joint sample peak</td><td class="num">−20.000</td><td class="num">−20.000</td>
+							</tr>
+							<tr>
+								<td>Joint true peak</td><td class="num">−2.986</td><td class="num after">−19.992</td>
+							</tr>
+							<tr>
+								<td>Implied overshoot</td><td class="num">17.014 dB</td>
+								<td class="num after">0.008 dB</td>
+							</tr>
+						</tbody>
+					</table>
+					<p class="note spaced">
+						No reference row moves with it either, and the reason is structural rather than lucky:
+						MAAT reads at most two channels, so every referenced true-peak row in the corpus is
+						stereo, mono or per-channel — all cases where the guard is a no-op or does not apply.
+					</p>
+				</div>
+			</div>
+			<p class="note rules">
+				The lesson the harness took is the one its Tier 3 oracle exists for. A corpus of real albums
+				proves what happens on real albums; it cannot prove what happens on the input nobody has.
 			</p>
 		</article>
 

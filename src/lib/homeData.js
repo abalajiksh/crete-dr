@@ -21,7 +21,7 @@ export const metrics = [
 		metric: 'True peak',
 		standard: 'ITU-R BS.1770-4',
 		definition:
-			'4× polyphase FIR, 12 taps per phase, per channel; clamped to ≥ the sample peak, which the standard requires by definition.'
+			'4× polyphase FIR, 12 taps per phase, per channel; the joint figure takes the **scored** channels, matching the joint sample peak. Clamped to ≥ the sample peak, which the standard requires by definition.'
 	},
 	{
 		metric: 'Max M / Max S',
@@ -88,7 +88,7 @@ export const builds = [
 	{
 		target: 'make cli-json-ffmpeg',
 		binary: 'crete-ffmpeg',
-		adds: 'ALAC, MP3, AAC, Opus, TrueHD, DTS-HD MA, AC-3.'
+		adds: 'ALAC, MP3, AAC, Opus, TrueHD, DTS-HD MA, AC-3, and the codec profile.'
 	},
 	{ target: 'make gui', binary: 'crete-gui', adds: 'SDL2 + Dear ImGui drag-and-drop app.' },
 	{ target: 'make gui-ffmpeg', binary: 'crete-gui-ffmpeg', adds: 'Both of the above.' }
@@ -110,11 +110,19 @@ export const limits = [
 	},
 	{
 		head: 'Atmos and DTS:X are measured as their channel bed.',
-		body: 'There is no renderer in the chain. Object metadata is discarded, and crête says which bed it measured.'
+		body: 'There is no renderer in the chain. Object metadata is discarded, and since 0.15.0 the output names the profile and marks the layout as a bed. Auro-3D cannot be identified this way and is not attempted.'
 	},
 	{
 		head: 'Disc-audio formats have no external oracle.',
-		body: 'TrueHD / DTS-HD MA / AC-3 are gated against crête’s own recorded values and against the LPCM carrier of the same master — nothing outside crête.'
+		body: 'TrueHD / DTS-HD MA / AC-3 are gated against crête’s own recorded values and against the LPCM carrier of the same master — nothing outside crête. SACD and DST now sit in the same position.'
+	},
+	{
+		head: 'DST decoding runs at about 2× realtime.',
+		body: 'Six channels through one arithmetic decoder, which cannot be parallelised inside a frame — a 43-minute 5.1 disc takes roughly 20 minutes. Frames are independent, so this is fixable and not yet fixed.'
+	},
+	{
+		head: 'SACD images are a CLI format.',
+		body: 'The GUI accepts `.dsf` and `.dff` but not `.iso`, and has no area control, so a disc image goes through `crete` rather than `crete-gui`.'
 	},
 	{
 		head: 'The >4 GB path is exercised; a >4 GB allocation is not.',

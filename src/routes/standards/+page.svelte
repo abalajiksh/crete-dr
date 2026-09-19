@@ -164,8 +164,18 @@
 				<h3>True peak, and why it is clamped</h3>
 				<p>
 					A 4× polyphase FIR with 12 taps per phase, per channel; the joint result is the maximum
-					across channels. The result is clamped to be at least the sample peak, which BS.1770
-					requires by definition — the reconstructed continuous waveform passes through every sample.
+					across the <strong>scored</strong> channels, so on a multichannel layout the LFE is excluded
+					exactly as it is from the joint sample peak, and <code>--dr-lfe</code> moves both together.
+					The result is clamped to be at least the sample peak, which BS.1770 requires by definition —
+					the reconstructed continuous waveform passes through every sample.
+				</p>
+				<p>
+					Up to 0.14.0 the joint true peak alone had no such guard, so the two joint peaks were
+					measured over different channel sets. On a file whose LFE is its loudest channel that
+					produced a true peak far above the sample peak for reasons that had nothing to do with
+					inter-sample overshoot — a synthetic 5.1 with every channel at −20 dBFS and the LFE at −3
+					read −20.000 against −2.986 — and PLR inherited it. The <a href="/changelog/">0.15.0 entry</a>
+					has the measurement.
 				</p>
 				<p>
 					The interpolation filter is designed for audio-band content and attenuates energy near

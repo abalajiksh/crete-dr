@@ -45,7 +45,7 @@ export const oracles = [
 	{
 		rank: 'Tier 3 · analytic',
 		name: 'Synthetic self-checks',
-		text: 'Signals whose answer is known on paper, needing no corpus and no harness. `check_fix12.sh` asserts that equal-peak / half-RMS channels differ by exactly 6.02 dB, and that raw track values 7.6/7.6/7.1 give album DR7. It passes on the fixed build and fails on the broken one.'
+		text: 'Signals whose answer is known on paper, needing no corpus and no harness. `check_fix12.sh` asserts that equal-peak / half-RMS channels differ by exactly 6.02 dB, and that raw track values 7.6/7.6/7.1 give album DR7. It passes on the fixed build and fails on the broken one. This tier is what catches the input no corpus holds: a synthetic 5.1 whose LFE is its loudest channel exposed the joint true-peak defect that every real album hides, and the DST decoder’s frame-consumption assertion caught a decoder that satisfied every other plausibility check available.'
 	},
 	{
 		rank: 'Tier 4 · controls',
@@ -156,7 +156,7 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.14.0. */
+/** Everything currently open, with the number attached. Complete as of 0.16.0. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
@@ -173,14 +173,32 @@ export const openItems = [
 	{
 		what: 'Disc audio has no external oracle',
 		measure:
-			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail.',
+			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. SACD and DST are now in the same position.',
 		status: 'Open, not a blocker'
+	},
+	{
+		what: 'SACD is not in the weekly harness yet',
+		measure:
+			'The intended gate is crête-on-the-ISO against crête on an external extraction of the same disc — crête versus crête, needing no outside meter. What has been run is narrower and passed: all ten stereo-area track durations on the 2018 DSOTM disc match the published running order, and one track returns peak −5.489 / RMS −19.753 against the −5.49 / −19.75 already recorded from a `.dsf` rip of the same album. The extraction comparison is worth running once; the suite is not written.',
+		status: 'Open'
+	},
+	{
+		what: 'DST decoding is slow',
+		measure:
+			'Roughly 2× realtime for six channels — a 43-minute 5.1 disc takes about 20 minutes. DST interleaves every channel through one arithmetic decoder, so no parallelism exists inside a frame; the prediction history is reinitialised per frame, so frames are independent and could be decoded in parallel. Not done.',
+		status: 'Open, known fix'
 	},
 	{
 		what: 'Object audio is measured as its bed',
 		measure:
-			'No Atmos or DTS:X renderer exists in the chain. The 7.1 TrueHD bed is what a non-Atmos playback chain delivers, and crête labels it as such. Do not read a bed measurement as an Atmos measurement.',
+			'No Atmos or DTS:X renderer exists in the chain. The 7.1 TrueHD bed is what a non-Atmos playback chain delivers, and since 0.15.0 crête names the profile and marks the layout as a bed rather than leaving it to be inferred. Do not read a bed measurement as an Atmos measurement.',
 		status: 'Out of scope, labelled'
+	},
+	{
+		what: 'Auro-3D cannot be identified',
+		measure:
+			'FFmpeg reports an Auro carrier as plain DTS-HD MA, so the profile field cannot see it. On the one disc measured the height channels were in the carrier’s low bits — real enough to find, at 803,853 non-zero LFE samples within ±24 against the DTS:X carrier’s exact zero — but reading that is inference, not a bitstream field. If it is ever built it belongs in the confidence-scored forensics namespace, never in the metrics.',
+		status: 'Not attempted'
 	},
 	{
 		what: 'The >4 GB allocation is untested',
@@ -217,6 +235,12 @@ export const openItems = [
 		measure:
 			'It has no control for the DR averaging mode or the block set and always uses the shipping defaults; both are CLI-only A/B switches.',
 		status: 'By design'
+	},
+	{
+		what: 'The GUI does not open an SACD image',
+		measure:
+			'`.iso` is absent from the accepted extensions and there is no area selector, so disc images go through the CLI. Nothing about the decode is CLI-specific — it is front-end surface that has not been added.',
+		status: 'Open'
 	},
 	{
 		what: 'Release packaging is not built',

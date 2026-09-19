@@ -2,14 +2,14 @@
 	import Footer from '$lib/Footer.svelte';
 	import Inline from '$lib/Inline.svelte';
 	import { version } from '$lib/version.js';
-	import { native, ffmpeg, dsdAxes, buildCmds, platforms } from '$lib/formatsData.js';
+	import { native, ffmpeg, dsdAxes, sacdArea, buildCmds, platforms } from '$lib/formatsData.js';
 </script>
 
 <svelte:head>
 	<title>Formats — crête</title>
 	<meta
 		name="description"
-		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, DSD decimation, MQA detection and the platform matrix."
+		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DSD decimation, MQA detection and the platform matrix."
 	/>
 </svelte:head>
 
@@ -80,7 +80,8 @@
 					crête loads a file before decoding it. At the default DSD output rate a monolithic
 					60-minute DSD64 album decodes to about 2.6 GB of float64; at 352.8 kHz that is 8× more. Cue
 					slicing adds one slice plus roughly twice its size as working set. On constrained hosts,
-					cap the worker count with <code>-j</code>.
+					cap the worker count with <code>-j</code>. The SACD reader is the one exception: a disc
+					image is far too large to hold, so it seeks.
 				</p>
 			</div>
 		</div>
@@ -213,13 +214,47 @@ Use --stream N to choose.`}</pre>
 		</article>
 
 		<article class="case">
-			<h3>Object audio is measured as its bed</h3>
-			<p class="measure wide">
-				There is no Atmos or DTS:X renderer in the chain. What gets decoded is the underlying channel
-				bed — TrueHD 7.1, or E-AC-3 5.1 for Dolby Digital Plus with Atmos — and the object metadata is
-				discarded. crête's numbers for such a file are the bed's numbers, which is exactly what a
-				non-Atmos playback chain delivers, and <em>not</em> what a renderer would produce.
-			</p>
+			<h3>Object audio is measured as its bed, and now says so</h3>
+			<div class="cols-tight">
+				<div>
+					<p class="measure">
+						There is no Atmos or DTS:X renderer in the chain. What gets decoded is the underlying
+						channel bed — TrueHD 7.1, or E-AC-3 5.1 for Dolby Digital Plus with Atmos — and the
+						object metadata is discarded. crête's numbers for such a file are the bed's numbers,
+						which is exactly what a non-Atmos playback chain delivers, and <em>not</em> what a
+						renderer would produce.
+					</p>
+					<p class="measure">
+						That is a complete measurement of something real, but an unqualified "crête measures
+						Atmos" would be false — so the profile is reported separately from the layout, and JSON
+						carries <code>codec_profile</code> and an <code>immersive_bed</code> boolean. It is
+						<strong>identification, not decode</strong>, following the precedent MQA detection already
+						set: name the premium layer from an authoritative bitstream field, never imply it was
+						rendered. The field is descriptive — no measured value depends on it.
+					</p>
+					<p class="measure">
+						A non-immersive profile such as DTS-HD MA is reported too, without the bed qualifier:
+						there is nothing unrendered about it. And the profile comes only from the FFmpeg tier,
+						since the zero-dependency binary cannot decode these codecs at all.
+					</p>
+				</div>
+				<div>
+					<pre class="term">{`Format:   TRUEHD 24-bit / 48000 Hz
+Profile:  Dolby TrueHD + Dolby Atmos
+Layout:   7.1 · L R C LFE Lss Rss Lrs Rrs
+          [bed -- Atmos objects not rendered]`}</pre>
+					<h4 class="val-head">Auro-3D is not detectable this way</h4>
+					<p class="note">
+						FFmpeg reports an Auro carrier as plain DTS-HD MA, so no profile field can see it. On the
+						one disc measured here the "Auro-3D 9.1" label was a container title tag, with the height
+						channels buried in the carrier's low bits — a real signature, since on a solo-piano
+						recording whose LFE is otherwise digitally silent that carrier held 803,853 non-zero
+						samples within ±24 against the DTS:X carrier's exact zero. But reading it is inference
+						rather than a declared field, so if it is ever built it belongs in a confidence-scored
+						forensics namespace, gated off, never in the metrics.
+					</p>
+				</div>
+			</div>
 		</article>
 
 		<article class="case">
@@ -322,7 +357,175 @@ Use --stream N to choose.`}</pre>
 	</section>
 
 	<section class="section">
-		<p class="kicker">05 — MQA</p>
+		<p class="kicker">05 — SACD disc images</p>
+		<h2>The disc is the input. Both areas of it.</h2>
+		<p class="intro">
+			SACD rips circulate overwhelmingly as <code>.iso</code>, so for a meter with this much DSD
+			machinery that was the gap a real collection hits first — until crête read them, a disc had to
+			be extracted to <code>.dsf</code> or <code>.dff</code> before it could be measured at all.
+		</p>
+
+		<div class="cols-tight">
+			<div>
+				<p class="measure">
+					crête reads the master TOC, both area TOCs, the track list and the audio-sector packet
+					stream, and hands per-channel DSD to the <strong>same decimation chain</strong> every
+					<code>.dsf</code> and <code>.dff</code> goes through. So the three DSD axes above apply
+					unchanged, and crête on an ISO must agree with crête on an extracted rip of the same disc —
+					a crête-versus-crête gate that needs no external oracle.
+				</p>
+				<p class="measure">
+					A disc image is a third shape alongside "one file" and "cue-sliced": the track list comes
+					from the disc, and each track is decoded from its own sector range rather than sliced out of
+					one decode. It is also the one decoder that <em>seeks</em> rather than loading the whole
+					file — the test image is 3.88 GiB, and its stereo area alone decodes to 1.8 GB of float64
+					at the default output rate, or 14.6 GB at 352.8 kHz.
+				</p>
+				<h3 class="axis-head"><code>{sacdArea.flag}</code></h3>
+				<p class="measure"><Inline text={sacdArea.text} /></p>
+			</div>
+			<div>
+				<pre class="term">{`crete album.iso                          # auto: the 2-channel area
+crete --sacd-area multichannel album.iso # the 5.1 area
+crete --sacd-area stereo       album.iso`}</pre>
+				<p class="note spaced">
+					Dispatch is by <strong>content, not extension</strong>. <code>.iso</code> names every disc
+					image ever made, so crête checks for the SACD master TOC signature at a fixed sector and
+					quietly ignores anything else rather than trying to meter a data DVD.
+				</p>
+				<h4 class="val-head">Validation</h4>
+				<p class="note">
+					On the 2018 Dark Side of the Moon SACD all ten stereo-area track durations match the
+					published running order — 42:57 against the area's own declared 42:59 — and one track
+					returns peak <strong>−5.489</strong> / RMS <strong>−19.753</strong> against the −5.49 /
+					−19.75 already recorded for that album from a <code>.dsf</code> rip. Every non-ISO path was
+					compared byte-for-byte across the change: FLAC, AC-3, TrueHD, WAV and DFF all identical.
+				</p>
+			</div>
+		</div>
+
+		<article class="case">
+			<h3>DST, and the only check that caught a wrong decoder</h3>
+			<div class="cols-tight">
+				<div>
+					<p class="measure">
+						DST is SACD's lossless compression, and multichannel areas commonly use it — on that
+						disc the stereo area is plain DSD at 1.72 GiB while the 5.1 area is DST at 2.16 GiB
+						against the 5.16 GiB it would need uncompressed. crête carries its own decoder, written
+						from the published coding syntax and zero-dependency like everything else, so both areas
+						of a hybrid disc go through the same chain and nothing downstream can tell which the
+						disc used. DST is lossless; this is not an approximation.
+					</p>
+					<p class="measure">
+						<strong>Every frame must consume exactly its own coded length</strong>, and the decoder
+						asserts it. Arithmetic coding is exact: a decoder consumes the encoder's bits if and only
+						if it applies the encoder's probabilities. That assertion exists because the first
+						version of this decoder was wrong in a way nothing else could see.
+					</p>
+					<p class="measure">
+						It read a comparison from a syntax figure that the clause prose contradicts. Every frame
+						decoded without throwing. Every header parsed to stable, sane values. Mispredictions came
+						out at a healthy-looking 0.75 %. The output was 1-bit data at the right density that
+						decimated to audible sound. It was the prediction filter free-running on its own output,
+						consuming 15 % of each frame.
+					</p>
+				</div>
+				<div>
+					<table class="ab">
+						<thead>
+							<tr><th>The signal that was available</th><th>broken</th><th>correct</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>Frames decoded without error</td><td class="num">all</td><td class="num">all</td></tr>
+							<tr><td>Misprediction rate</td><td class="num">0.75 %</td><td class="num">0.75 %</td></tr>
+							<tr><td>Per-bin probability check</td><td class="num">passes</td><td class="num">passes</td></tr>
+							<tr><td><strong>Frame bits consumed</strong></td><td class="num">15 %</td><td class="num after">100.0 %</td></tr>
+							<tr><td>2–15 kHz band</td><td class="num">+19 dB</td><td class="num after">−57 dB</td></tr>
+							<tr><td>Sample peak</td><td class="num">+2.06</td><td class="num after">−13.87 dBFS</td></tr>
+						</tbody>
+					</table>
+					<p class="note spaced">
+						The two checks reached for first are structurally incapable of catching this. The
+						misprediction rate is low <em>because</em> the decoder consumes few bits, and per-bin
+						probability consistency is vacuous — an arithmetic decoder fed any probability sequence
+						produces events matching that sequence. It proves the coder, not the probabilities.
+					</p>
+				</div>
+			</div>
+			<p class="note rules">
+				It is not fast: roughly <strong>2× realtime for six channels</strong>, so a 43-minute 5.1 disc
+				takes about 20 minutes. All channels share one arithmetic decoder, so there is no parallelism
+				inside a frame — but the filter history is reinitialised per frame, so frames are independent
+				and could be decoded in parallel. Not done yet.
+			</p>
+		</article>
+
+		<article class="case">
+			<h3>To validate a DSD de-interleave, look at the noise floor</h3>
+			<div class="cols-tight">
+				<div>
+					<p class="measure">
+						Frames are byte-interleaved across channels. The other reading — contiguous per-channel
+						blocks — was implemented first and "confirmed" with the obvious test, the left/right
+						split. That test is worthless here: <strong>both readings give a plausible DR and a
+						plausible L/R difference</strong>, because a wrong de-interleave of a 1-bit stream still
+						decimates to something music-shaped.
+					</p>
+					<p class="measure">
+						What settles it is the property DSD exists for. Byte-interleaved gives the textbook
+						picture — music at low frequency, a quiet 2–20 kHz band, shaped noise climbing above
+						40 kHz. Blocks give a floor rising at every frequency with no quiet band anywhere. The
+						two are 34 dB apart where it matters.
+					</p>
+					<p class="measure">
+						Two more traps in the same reader produced equally plausible wrong answers. The
+						frame-format value for compressed is <em>zero</em> and the uncompressed forms are 2 and
+						3, so reading it backwards labels a DST area uncompressed — and DST bytes fed to the DSD
+						path decode to something that still looks like a measurement. And a DST sector's frame
+						header carries one byte more than a DSD sector's, which taken unconditionally overruns
+						the first packet and drops that sector's audio entirely: <strong>14 % of every track
+						lost with no error</strong>, 58.65 seconds of a 68.45-second one. Both are now
+						cross-checked, and the header length is read from the sector rather than assumed from
+						the area.
+					</p>
+				</div>
+				<div>
+					<p class="term-head">Mean level by band, decimated to 352.8 kHz</p>
+					<div class="scroll-x">
+						<table class="ab bands">
+							<thead>
+								<tr>
+									<th></th><th>0–2k</th><th>2–15k</th><th>15–20k</th><th>24–40k</th><th>40–100k</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>byte-interleaved</td><td class="num">25.8</td><td class="num after">−20.2</td>
+									<td class="num">−20.4</td><td class="num">−17.6</td><td class="num">15.4</td>
+								</tr>
+								<tr>
+									<td>per-channel blocks</td><td class="num">27.5</td><td class="num after">13.7</td>
+									<td class="num">17.7</td><td class="num">23.2</td><td class="num">30.4</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h4 class="val-head">Provenance</h4>
+					<p class="note">
+						Both readers are written from the format descriptions — structure layouts and coding
+						syntax are facts about a format, used as documentation. No implementation was consulted:
+						the reference extractor is GPL-2.0, which is strictly worse for an MIT project than the
+						LGPL conflict the DSD engine swap existed to remove, and its DST decoder is a console
+						SPU offload with no software path in it at all. The other software DST decoder available
+						is LGPL. crête stays MIT plus BSD-2-Clause.
+					</p>
+				</div>
+			</div>
+		</article>
+	</section>
+
+	<section class="section">
+		<p class="kicker">06 — MQA</p>
 		<h2>Reported unconditionally. There is no flag to turn it off.</h2>
 		<p class="intro">
 			MQA is a lossy codec delivered inside an ordinary lossless-looking container — 44.1 or 48 kHz,
@@ -378,7 +581,7 @@ reconstructed (no open MQA decoder exists).
 	</section>
 
 	<section class="section">
-		<p class="kicker">06 — Build &amp; platforms</p>
+		<p class="kicker">07 — Build &amp; platforms</p>
 		<h2>One executable, everywhere it is built</h2>
 		<div class="cols-tight">
 			<div>
@@ -389,6 +592,17 @@ reconstructed (no open MQA decoder exists).
 					GUI prerequisites are SDL2 and an OpenGL development package; Dear ImGui is fetched once by
 					<code>make setup-imgui</code>. The FFmpeg tier needs its compact static build run once, and
 					<code>pkg-config</code>.
+				</p>
+				<p class="note spaced">
+					<code>setup-deps</code> checks by <strong>capability, not package name</strong>, so a
+					compiler you built yourself still counts; it prints every command before running it,
+					supports <code>--check</code> and <code>--dry-run</code>, and never installs something
+					already present. Homebrew, dnf, apt, pacman, zypper and MSYS2 are covered. It installs the
+					<em>toolchain</em>; the three <code>setup-*</code> targets fetch the sources crête vendors.
+					Two things it checks are easy to get wrong on your own: an x86 host with no assembler fails
+					the FFmpeg build as a deep, confusing error rather than a missing dependency, and MinGW's
+					<code>win32</code> threading model ships a standard library with no threads at all — so such
+					a build links cleanly and then dies on the first album.
 				</p>
 			</div>
 			<div>
@@ -464,6 +678,24 @@ reconstructed (no open MQA decoder exists).
 	.val-head {
 		margin: 24px 0 8px;
 		font-size: 15px;
+	}
+
+	/* The SACD area flag labels its own paragraph, exactly as the DSD axis
+	   headings do inside `.rows` — so it takes their size, not this page's h3. */
+	.axis-head {
+		font-size: 14px;
+		margin: 24px 0 4px;
+	}
+
+	/* Six bands in a half-width column: narrow the cells and let it scroll
+	   rather than wrapping a numeric row. */
+	.bands {
+		min-width: 400px;
+	}
+
+	.bands th,
+	.bands td {
+		padding-right: 8px;
 	}
 
 	.wide {

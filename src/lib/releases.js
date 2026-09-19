@@ -17,6 +17,8 @@
 // Dates are the tag date where a tag exists, otherwise the version-bump commit.
 // 0.13.1 and the 0.10.x / 0.11.x releases were shipped without tags; their
 // dates come from the bump commits (d1061a2, 6ae068d, 666cb2f, and so on).
+// 0.14.1 has no entry of its own: it was bumped, then folded into 0.15.0 before
+// it was tagged, so the release that shipped its two changes is 0.15.0.
 
 /**
  * @typedef {'moves' | 'identical' | 'additive'} Impact
@@ -31,6 +33,29 @@
 
 /** @type {Release[]} */
 export const releases = [
+	{
+		version: '0.16.0',
+		date: '2026-09-19',
+		impact: ['additive'],
+		title: 'A DST decoder, so SACD multichannel areas measure',
+		body: [
+			'DST is SACD’s lossless compression, and multichannel areas commonly use it — on the DSOTM disc the stereo area is plain DSD at 1.72 GiB while the 5.1 area is DST at 2.16 GiB against the 5.16 GiB it would need uncompressed. 0.15.0 refused such an area by name; it now decodes, through the same `libdsddpcm` chain as every `.dsf` and `.dff`, so nothing downstream can tell which form the disc used. DST is lossless, so this is not an approximation. Result on DSOTM: **10/10 tracks**, durations matching the album, per-channel DR 9–15 with a normal 5.1 profile, DR10–DR12 per track.',
+			'**The decoder asserts its own bit consumption, and that is the only check that worked.** Arithmetic coding consumes exactly the encoder’s bits if and only if the decoder applies the encoder’s probabilities, so every frame must consume its own coded length. A first version read Figure 10.10’s `C > A-Q` where the clause prose says `C >= A-Q`, and the failure announced itself in no other way: every frame decoded without throwing, every header parsed to stable values, mispredictions came out at a plausible **0.75 %**, and the output was 1-bit data that decimated to audible sound — while actually being the prediction filter free-running on its own output. It consumed **15 %** of each frame. The corrected decoder consumes **100.0 %**, and the audio band went from +19 dB to −57 dB with peak −13.87 dBFS rather than +2.06.',
+			'Written from the ISO/IEC 14496-3 Subpart 10 syntax, zero-dependency like the rest: the one other software DST decoder available is LGPL, the licence class crête removed when it swapped out the old DSD engine. Nothing else moved — the uncompressed SACD path is byte-identical on all ten stereo-area rows, and `--dr-blocks`, `--dr-mean`, `--dr-lfe` and `--sacd-area` defaults are untouched.'
+		]
+	},
+	{
+		version: '0.15.0',
+		date: '2026-09-19',
+		impact: ['moves', 'additive'],
+		title: 'The joint true peak honours the LFE policy; SACD images read directly',
+		body: [
+			'**The joint true peak excluded nothing.** The joint *sample* peak has skipped unscored channels since 0.12.0, but the loop behind `max_true_peak_dbtp` had no such guard — so on a multichannel file the two were measured over different channel sets and `--dr-lfe` reached one and not the other. True peak is ≥ sample peak by definition and the excess is inter-sample overshoot, a few tenths of a dB; on a synthetic 5.1 with every channel at −20 dBFS and the LFE at −3, crête reported a sample peak of −20.000 against a true peak of **−2.986**. A 17.01 dB gap, all of it the LFE, and `plr_db` inherited it — an LFE-inclusive numerator over an LFE-excluded denominator. The same synthetic now reads −19.992: 0.008 dB of genuine overshoot. `--dr-lfe include` reproduces 0.14.0 **exactly**, since the old behaviour was unconditional inclusion.',
+			'It never surfaced on the corpus, and the release says why rather than claiming it did not matter: the LFE has to be the loudest channel and there it never is — real DSOTM 5.1 has the LFE at −11.14 against L at −1.67. Measured whole-JSON on all six carriers of that Blu-ray, **nothing moved at the default setting either**, 6/6. The corpus never contained the case; the synthetic does.',
+			'**`codec_profile` lands**, so an immersive carrier says it is being measured as its channel bed. FFmpeg has no Atmos or DTS:X renderer — it decodes the TrueHD 7.1 bed, or the E-AC-3 5.1 core for JOC, and discards the object metadata — so the layout line now carries `[bed — Atmos objects not rendered]` and JSON gains `codec_profile` and `immersive_bed`. Descriptive only: **no measured value depends on it**. The profile was supposed to be free from `AVCodecContext::profile`, and the number is; the *name* is not, because the compact build configures `--enable-small` and every profile-name table expands to NULL, so crête carries its own.',
+			'**SACD `.iso` images read directly** — the format gap a DSD collection hits first, since rips circulate as disc images and previously needed an external extraction. The disc TOC supplies the track list and each track decodes from its own sector range through the same DSD chain, so `--dsd-mode`, `--dsd-filter` and `--dsd-out-rate` all apply. `--sacd-area auto|stereo|multichannel` picks the area; `auto` prefers stereo, the layer crête’s DR references are built on. Dispatch is by content, not extension: crête looks for `SACDMTOC` at LSN 510 and ignores anything else rather than metering a data DVD. DST-compressed areas were refused by name here, and decode from 0.16.0.'
+		]
+	},
 	{
 		version: '0.14.0',
 		date: '2026-09-18',
