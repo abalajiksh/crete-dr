@@ -212,7 +212,14 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 		</div>
 		<div class="figures">
 			{#each shots as s (s.id)}
-				<Figure src={s.src} placeholder={s.placeholder} caption={s.caption} />
+				<Figure
+					src={s.src}
+					placeholder={s.placeholder}
+					caption={s.caption}
+					alt={s.alt}
+					width={s.width}
+					height={s.height}
+				/>
 			{/each}
 		</div>
 	</section>

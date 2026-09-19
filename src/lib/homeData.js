@@ -138,24 +138,36 @@ export const premises = [
 	}
 ];
 
-/** The GUI captures. `src` stays null until a real 0.14.0 capture is dropped in. */
+/** The GUI captures, from the 0.14.0 build.
+    Cropped to the window, 1600px wide, WebP — the source PNGs are ~6× the size
+    for no visible gain on a figure this small. `width`/`height` are the real
+    pixel dimensions so the browser reserves the box before the image lands. */
 export const shots = [
 	{
 		id: 'gui-results',
-		src: null,
-		placeholder: '0.14.0 GUI — results table',
+		src: '/screenshots/gui-results.webp',
+		width: 1600,
+		height: 1118,
+		alt: 'The crête GUI in its dark shell, showing a quad album\u2019s results table \u2014 a DR meter bar and the peak, RMS, LUFS, PLR and duration columns for each track.',
+		placeholder: '0.14.0 GUI \u2014 results table',
 		caption: 'Results table with DR meter bars.'
 	},
 	{
 		id: 'gui-channels',
-		src: null,
-		placeholder: '0.14.0 GUI — channel matrix',
+		src: '/screenshots/gui-channels.webp',
+		width: 1600,
+		height: 1118,
+		alt: 'The per-channel panel on a 5.1 master: a meter bar per channel, the lowest scored channel (C) drawn in the accent, and the LFE greyed as unscored under an \u201cLFE excluded\u201d marker.',
+		placeholder: '0.14.0 GUI \u2014 channel matrix',
 		caption: 'Per-channel matrix on a 5.1 master.'
 	},
 	{
 		id: 'gui-dsd',
-		src: null,
-		placeholder: '0.14.0 GUI — DSD strip',
+		src: '/screenshots/gui-dsd.webp',
+		width: 1600,
+		height: 1118,
+		alt: 'The DSD strip, shown only for DSD sources: chain (multistage or direct), filter (default, firls or kaiser) and output rate (44.1 to 352.8 kHz), with the shipping defaults selected.',
+		placeholder: '0.14.0 GUI \u2014 DSD strip',
 		caption: 'DSD strip: chain, filter, output rate.'
 	}
 ];

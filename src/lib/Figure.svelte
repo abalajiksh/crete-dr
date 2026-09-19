@@ -5,15 +5,16 @@
 	 * aspect ratio — so a missing image is obvious rather than silently absent,
 	 * and adding one needs no change here.
 	 *
-	 * @type {{ src: string | null, placeholder: string, caption: string, alt?: string }}
+	 * @type {{ src: string | null, placeholder: string, caption: string,
+	 *          alt?: string, width?: number, height?: number }}
 	 */
-	let { src, placeholder, caption, alt } = $props();
+	let { src, placeholder, caption, alt, width, height } = $props();
 </script>
 
 <figure>
 	<div class="frame">
 		{#if src}
-			<img {src} alt={alt ?? caption} loading="lazy" />
+			<img {src} alt={alt ?? caption} {width} {height} loading="lazy" decoding="async" />
 		{:else}
 			<div class="slot" role="img" aria-label="{placeholder} — capture pending">
 				<span>{placeholder}</span>
@@ -39,8 +40,10 @@
 		height: auto;
 	}
 
+	/* Matches the captures' own 1600×1118, so a pending slot reserves the same
+	   box the real image will occupy and nothing reflows when one is added. */
 	.slot {
-		aspect-ratio: 16 / 10;
+		aspect-ratio: 1600 / 1118;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
