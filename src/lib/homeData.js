@@ -162,6 +162,15 @@ export const shots = [
 		caption: 'Per-channel matrix on a 5.1 master.'
 	},
 	{
+		id: 'gui-settings',
+		src: '/screenshots/gui-settings.webp',
+		width: 1600,
+		height: 1118,
+		alt: 'The side panel open on Settings: the dark-shell toggle, the \u201cscore the LFE in DR\u201d switch noting that the LFE is measured but not scored by default, the opt-in analysis log, and below them the About text and the measurement-standards list.',
+		placeholder: '0.14.0 GUI \u2014 settings & about',
+		caption: 'Settings, About and the measurement standards.'
+	},
+	{
 		id: 'gui-dsd',
 		// Cropped to the strip rather than the whole window: at figure size the
 		// strip is the subject, and the rest of that screen is an empty drop target.
