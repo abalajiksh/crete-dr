@@ -3,7 +3,7 @@
 	import Figure from '$lib/Figure.svelte';
 	import Inline from '$lib/Inline.svelte';
 	import { version } from '$lib/version.js';
-	import { metrics, bands, builds, limits, premises, shots } from '$lib/homeData.js';
+	import { metrics, bands, builds, limits, premises, reach, shots } from '$lib/homeData.js';
 </script>
 
 <svelte:head>
@@ -180,6 +180,14 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 					Drag-and-drop, native file and folder dialogs, sortable results, light and dark shells.
 				</p>
 				<p class="measure">
+					Since 0.16.1 both front-ends expand an input path through <strong>one collector</strong>, so
+					a folder cannot mean different things depending on which one opened it: cue sheets slice
+					per <code>TRACK</code>, an SACD <code>.iso</code> lists its TOC behind an area selector, and
+					a multi-stream Blu-ray raises a stream picker before the run rather than a warning after
+					it. Tracks list in album order — sorting changes the view, never the order or the
+					selection.
+				</p>
+				<p class="measure">
 					An album's files are decoded and analysed across a thread pool sized to the host's cores,
 					order-preserving and verified bit-identical to a sequential run — around 5–6× faster on a
 					typical album, with no number moved. Log writing is opt-in; by default results stay in the
@@ -205,14 +213,14 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 					<strong>About &amp; DSD Guide panels</strong>
 					<p>
 						The measurement standard behind each metric, and the full decimation support matrix, in
-						the app.
+						the app. About also pins the two axes the GUI does not expose.
 					</p>
 				</div>
 				<div>
 					<strong>Codec profile</strong>
 					<p>
 						Where a stream declares one, the detail panel names it — and an immersive carrier says
-						which bed the numbers describe. SACD images are CLI-only.
+						which bed the numbers describe.
 					</p>
 				</div>
 			</div>
@@ -270,7 +278,39 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 	</section>
 
 	<section class="section">
-		<p class="kicker">06 — Known limitations</p>
+		<p class="kicker">06 — Reach</p>
+		<div class="cols-tight reach-intro">
+			<div>
+				<h2 class="h-lead">What it reads, on how many channels, and where it runs</h2>
+				<p class="measure">
+					crête is validated against MAAT DROffline and was cross-checked against foobar2000's DR
+					Meter, so on a stereo PCM album the three should agree — that is the whole point of the
+					weekly run, and where they still differ, the
+					<a href="/testing/">Testing</a> page names the metric and the size of the gap.
+				</p>
+				<p class="measure">
+					The difference is in reach. A reference that reads two channels cannot gate a 5.1 figure,
+					and a meter that is one binary with no dependencies can be run on an architecture nobody
+					has shipped a build for. Below is where crête goes further, and the suite that holds each
+					claim up.
+				</p>
+			</div>
+			<div class="rows reachlist">
+				{#each reach as r (r.head)}
+					<div class="reach">
+						<span class="reach-state {r.state}">{r.state}</span>
+						<span>
+							<strong>{r.head}</strong><br />
+							<span class="note"><Inline text={r.body} /></span>
+						</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<p class="kicker">07 — Known limitations</p>
 		<div class="cols-tight">
 			<div>
 				<h2 class="h-lead">What crête does not do, stated before you find out</h2>
@@ -381,6 +421,58 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 
 	.app-intro {
 		margin-bottom: 32px;
+	}
+
+	/* ── Reach ────────────────────────────────────────────────────────── */
+
+	.reach-intro h2 {
+		margin-bottom: 16px;
+	}
+
+	/* A state label in its own fixed column, then the claim — the same two-column
+	   row the DR bands use, so the two ruled lists on this page read as one
+	   device. The label is the reason the list is honest: 'planned' has to be as
+	   visible as 'gated', at the same size and in the same place. */
+	.reach {
+		display: grid;
+		grid-template-columns: 74px 1fr;
+		gap: 16px;
+		align-items: baseline;
+	}
+
+	.reach-state {
+		font-size: 10px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		padding: 3px 6px;
+		border: 1px solid var(--color-divider);
+		text-align: center;
+		color: var(--color-neutral-700);
+	}
+
+	.reach-state.gated {
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+		color: var(--poster-ink);
+	}
+
+	.reach-state.planned {
+		border-style: dashed;
+	}
+
+	.rows.reachlist .reach strong {
+		font-size: 14px;
+	}
+
+	@media (max-width: 720px) {
+		.reach {
+			grid-template-columns: 1fr;
+			gap: 6px;
+		}
+
+		.reach-state {
+			justify-self: start;
+		}
 	}
 
 	.limits-btn {

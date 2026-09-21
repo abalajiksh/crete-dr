@@ -156,7 +156,7 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.16.0. */
+/** Everything currently open, with the number attached. Complete as of 0.16.1. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
@@ -237,9 +237,9 @@ export const openItems = [
 		status: 'By design'
 	},
 	{
-		what: 'The GUI does not open an SACD image',
+		what: 'The new GUI bands were never looked at',
 		measure:
-			'`.iso` is absent from the accepted extensions and there is no area selector, so disc images go through the CLI. Nothing about the decode is CLI-specific — it is front-end surface that has not been added.',
+			'0.16.1’s SACD, cue and stream-picker bands are verified by construction — both front-ends call one collector — and headlessly, which is not the same as having been seen. The SACD row’s trailing hint is long, so narrow window widths are the case to check. The results-table footer clipping in 0.12.0 is precisely the class of defect a suite cannot catch.',
 		status: 'Open'
 	},
 	{

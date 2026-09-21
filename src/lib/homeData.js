@@ -121,12 +121,54 @@ export const limits = [
 		body: 'Six channels through one arithmetic decoder, which cannot be parallelised inside a frame — a 43-minute 5.1 disc takes roughly 20 minutes. Frames are independent, so this is fixable and not yet fixed.'
 	},
 	{
-		head: 'SACD images are a CLI format.',
-		body: 'The GUI accepts `.dsf` and `.dff` but not `.iso`, and has no area control, so a disc image goes through `crete` rather than `crete-gui`.'
+		head: 'The 0.16.1 GUI bands have not been looked at.',
+		body: 'The SACD, cue and stream-picker bands are verified by construction and headlessly, never visually. Narrow window widths are the case to check.'
 	},
 	{
 		head: 'The >4 GB path is exercised; a >4 GB allocation is not.',
 		body: 'RF64 / BW64 / Wave64 64-bit sizes are honoured and verified, but crête loads a whole file before decoding and no test host is large enough yet.'
+	}
+];
+
+/** Reach: what crête reads, on how many channels, and where it runs — the axes
+    on which it is not a like-for-like alternative to the tools it is gated
+    against. Every figure is a suite result from the harness; `state` is
+    the only editorial field, and 'planned' means not built, not "soon".
+
+    The claim about the reference exports is crête's own corpus experience and
+    is stated as such: the MAAT rows crête holds carry at most two channels,
+    which is why SURROUND and DTSX are gated on stems. It is not a statement
+    about what that product can be made to do. */
+export const reach = [
+	{
+		head: 'Nine native formats, and the container cannot change the number',
+		state: 'gated',
+		body: 'WAV, RF64/BW64, Wave64, AIFF, AIFF-C `sowt`, FLAC, DSF, DFF and SACD `.iso` — DST-compressed areas included — all decoded by crête’s own code in every build, with no libFLAC and no libsndfile. The FORMAT suite transcodes six albums every way and requires **Δ 0.000** across all of them; CUE slicing is held to the same figure against the equivalent per-track album.'
+	},
+	{
+		head: 'Mono through 7.1, measured per channel',
+		state: 'gated',
+		body: 'Per-channel DR, peak, true peak, RMS and loudness with BS.1770-4 weighting, the LFE measured in full but not scored, and the multichannel rule **stated as a chosen rule** rather than implied. SURROUND runs 1620 comparisons, QUADIO 240 with zero flags, DTSX 350. The MAAT reference rows crête holds carry at most two channels, which is why those suites are gated against stems — there is no external oracle for a 5.1 figure.'
+	},
+	{
+		head: 'Two architectures, compared to each other every week',
+		state: 'gated',
+		body: 'Both Linux agents build natively and their JSON is compared field by field: **273 fields at 0.000e+00** on the lossless carriers. It needs `-ffp-contract=off` — without it the compiler fuses multiply-add on the architecture that has an FMA instruction and not on the one that does not, and the K-weighting biquads diverge at ULP level. macOS is one ULP away on `log10`, and the site says so rather than claiming three platforms agree.'
+	},
+	{
+		head: 'RISC-V as the third gated architecture',
+		state: 'planned',
+		body: 'Not built, not scheduled, and no number behind it yet. It is worth doing for the same reason aarch64 was: bit-identity is only a claim until a machine that rounds differently has to agree, and a third instruction set is the cheapest remaining test of it. It joins the weekly cross-architecture gate or it does not count.'
+	},
+	{
+		head: 'One binary, and nothing to install',
+		state: 'shipped',
+		body: 'The default build is a single C++17 translation unit with no external libraries and no build step beyond `make`; `STATIC=1` links it fully. MIT plus BSD-2-Clause for the DSD engine, so the whole measurement path can be read, audited and rebuilt — which is the one thing a closed reference cannot offer, however good its numbers are.'
+	},
+	{
+		head: 'Disc audio measured as authored',
+		state: 'shipped',
+		body: 'AC-3 and E-AC-3 carry Dolby DRC metadata and most decoders apply it by default — right for a player, wrong for a meter. crête pins `drc_scale=0`. Leaving it on moved peak by **6.2 dB** on one JOC 5.1 bed. Atmos and DTS:X are decoded as their channel bed and the output says so, because there is no renderer in the chain and a bed measurement is not an Atmos measurement.'
 	}
 ];
 

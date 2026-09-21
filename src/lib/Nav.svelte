@@ -4,6 +4,7 @@
 
 	const links = [
 		{ href: '/', label: 'Overview' },
+		{ href: '/cli/', label: 'CLI' },
 		{ href: '/testing/', label: 'Testing' },
 		{ href: '/standards/', label: 'Standards' },
 		{ href: '/formats/', label: 'Formats' },
