@@ -9,14 +9,14 @@
 	<title>Testing — crête</title>
 	<meta
 		name="description"
-		content="Ten thousand comparisons a week against an external reference: the pytest harness, the four tiers of oracle, what each suite gates, and every limitation still open."
+		content="Twelve thousand comparisons a week against an external reference: the pytest harness, the four tiers of oracle, what each suite gates, and every limitation still open."
 	/>
 </svelte:head>
 
 <div class="wrap">
 	<header class="page-head">
 		<p class="kicker">Test pipeline</p>
-		<h1>Ten thousand comparisons, every week, against something that is not crête.</h1>
+		<h1>Twelve thousand comparisons, every week, against something that is not crête.</h1>
 		<p class="lede">
 			The harness is a separate pytest repository driven by Jenkins across two Linux agents of
 			different architecture. Corpora live in object storage and are staged per suite. A run does not
@@ -27,20 +27,20 @@
 
 	<section class="stats band">
 		<div class="stat">
-			<div class="stat-num">173</div>
-			<div class="stat-label">tests, weekly #73</div>
+			<div class="stat-num">200</div>
+			<div class="stat-label">tests, weekly #77</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">159</div>
-			<div class="stat-label">passed · 0 failed · 14 skipped</div>
+			<div class="stat-num">184</div>
+			<div class="stat-label">passed · 0 failed · 16 skipped</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">10,662</div>
-			<div class="stat-label">metric comparisons (#55 census)</div>
+			<div class="stat-num">11,931</div>
+			<div class="stat-label">metric comparisons, 51 albums</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">0.0262</div>
-			<div class="stat-label">mean |Δ| dB over 2241 DR rows</div>
+			<div class="stat-num">44</div>
+			<div class="stat-label">flagged (0.37 %), none catastrophic</div>
 		</div>
 		<div class="stat">
 			<div class="stat-num accent">0</div>
@@ -121,6 +121,17 @@
 			run after it, and the <code>dsd2wav</code> build must come last in the manual build stage because
 			branches above it may clean the tree.
 		</p>
+		<p class="note narrow">
+			<strong>Weekly #77 is the first run on 0.17.0 and the first to carry INTEGRITY and SACD.</strong>
+			The result worth recording is not that it passed. It is that all fifteen of the per-suite detailed
+			reports are <em>identical</em> to the ones the last archived weekly produced — same 11,931
+			comparisons, same 44 flags, same per-metric maxima and averages, same two album mismatches — with a
+			single added header line as the only textual difference anywhere. #73 recorded <strong>0.13.1</strong>
+			and #77 records <strong>0.17.0</strong>, so that identity spans five releases: the RF64 and Wave64
+			containers, the joint true-peak LFE guard, the DST decoder, the shared input collector with its
+			natural-order fix, and the integrity checks. Each was argued to be a no-op on this corpus when it
+			shipped. This is the corpus agreeing, on every number it holds.
+		</p>
 	</section>
 
 	<section class="section">
@@ -197,7 +208,7 @@
 
 	<section class="section">
 		<p class="kicker">05 — Forensics</p>
-		<h2>Five more defects, and what caught each one</h2>
+		<h2>Six more defects, and what caught each one</h2>
 		<p class="intro">
 			Each of these passed every gate at the time it was found. Most were caught by reading the
 			deltas underneath a green run — and one was caught by a synthetic, because the corpus does not
@@ -379,6 +390,82 @@
 		</article>
 
 		<article class="case">
+			<p class="case-tag">0.17.0</p>
+			<h3>A broken file was scored as if nothing had happened</h3>
+			<div class="cols-tight">
+				<div>
+					<p class="measure">
+						The worst thing a meter can do is not refuse a file. It is to measure a broken one and
+						print a number. crête did exactly that: a FLAC with one bad sector was scored, averaged
+						into the album DR and returned <strong>exit 0</strong> with no error field anywhere in
+						the JSON — while the reference <code>flac</code> decoder refused the same file outright.
+						A single flipped byte was worse, because it produced numbers <em>identical</em> to the
+						clean file. No amount of reading the measurement could have found it.
+					</p>
+					<p class="measure">
+						Four checks now run, into one reporting channel. FLAC frame CRC-8 and CRC-16 are verified
+						rather than read and discarded — the only detector that catches an altered sample value.
+						Declared length is compared with decoded length on FLAC <code>STREAMINFO</code>, the
+						WAV/RF64/Wave64 <code>data</code> chunk and AIFF <code>COMM</code>/<code>SSND</code>. A
+						sample peak above 0 dBFS on integer PCM is impossible arithmetic and so is proof of a bad
+						decode whatever the checksums said. And JSON carries a <code>warnings</code> array that is
+						<em>always</em> present, so an empty array is the positive statement "nothing was wrong"
+						rather than the absence of evidence a missing key would be.
+					</p>
+					<p class="measure">
+						<strong>The file is still measured.</strong> crête is a meter, not a repair tool: it
+						reports what the bytes decode to and marks every affected number untrustworthy. That
+						separation is what keeps the intact-file path bit-identical by construction — verified on
+						62 files across nine codecs and five channel layouts, whole-JSON against a build of
+						0.16.1, <strong>0 differing</strong>.
+					</p>
+					<p class="measure">
+						Building the corpus immediately found a <strong>reachable segfault</strong>: a truncated
+						AIFF walked off the end of the buffer, because the chunk walker used file-supplied lengths
+						and an <code>SSND</code> offset without bounds-checking either — the same defect the RIFF
+						walker had fixed in 0.14.0, in the decoder that never got the same treatment.
+					</p>
+				</div>
+				<div>
+					<table class="ab">
+						<thead>
+							<tr><th>4-track album, one bad sector</th><th>0.16.1</th><th>0.17.0</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>Album DR, clean copy</td><td class="num">DR13</td><td class="num">DR13</td></tr>
+							<tr><td>Album DR, damaged copy</td><td class="num">DR9</td><td class="num">DR9</td></tr>
+							<tr>
+								<td>Sample peak, damaged</td><td class="num">+48.16 dBFS</td>
+								<td class="num">+48.16 dBFS</td>
+							</tr>
+							<tr><td>Reported as damaged</td><td class="num">no</td><td class="num after">yes</td></tr>
+							<tr><td>Exit status</td><td class="num">0</td><td class="num after">2</td></tr>
+						</tbody>
+					</table>
+					<table class="ab spaced">
+						<thead>
+							<tr><th>Corpus and suite</th><th>Result</th></tr>
+						</thead>
+						<tbody>
+							<tr><td><code>integrity</code> suite on 0.17.0</td><td class="num after">19/19</td></tr>
+							<tr><td>Same suite on 0.16.1</td><td class="num">13 fail</td></tr>
+							<tr><td>Fuzz cases, five native formats</td><td class="num">240, none crash</td></tr>
+							<tr><td>Truncation offsets swept per format</td><td class="num">21</td></tr>
+							<tr><td>Reference files tripping a check</td><td class="num">none, in 51 albums</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<p class="note rules">
+				<strong>WAV and AIFF carry no checksum</strong>, so altered sample values in them are
+				undetectable — by crête or by any other meter — because a run of zeros inside a
+				<code>data</code> chunk cannot be told apart from digital silence the artist put there. That
+				blind spot is <em>asserted</em> rather than glossed: the suite requires a WAV with 4 KB of zeros
+				written into its audio to come back clean, so the limitation stays visible in a green run.
+			</p>
+		</article>
+
+		<article class="case">
 			<p class="case-tag">Rejected</p>
 			<h3>Band-limiting before measurement: tested, then refused</h3>
 			<div class="cols-tight">
@@ -542,7 +629,7 @@ s06_dtshd_ma_2.0_96k.mkv      DCA     EXACT  0.000e+00`}</pre>
 
 <Footer {version}>
 	{#snippet note()}
-		Harness figures from weekly runs #53–#73. The pytest harness lives in a separate private
+		Harness figures from weekly runs #53–#77. The pytest harness lives in a separate private
 		repository.
 	{/snippet}
 </Footer>

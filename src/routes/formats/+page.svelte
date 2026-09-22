@@ -2,7 +2,15 @@
 	import Footer from '$lib/Footer.svelte';
 	import Inline from '$lib/Inline.svelte';
 	import { version } from '$lib/version.js';
-	import { native, ffmpeg, dsdAxes, sacdArea, buildCmds, platforms } from '$lib/formatsData.js';
+	import {
+		native,
+		integrityChecks,
+		ffmpeg,
+		dsdAxes,
+		sacdArea,
+		buildCmds,
+		platforms
+	} from '$lib/formatsData.js';
 </script>
 
 <svelte:head>
@@ -88,7 +96,74 @@
 	</section>
 
 	<section class="section">
-		<p class="kicker">02 — The FFmpeg tier</p>
+		<p class="kicker">02 — Damaged files</p>
+		<h2>What each container lets crête prove about itself</h2>
+		<p class="intro">
+			A meter's worst failure is not refusing a file — it is measuring a broken one and reporting a
+			number as though nothing happened. Before 0.17.0 crête did exactly that. It now verifies what
+			each format allows, and says so.
+		</p>
+		<div class="scroll-x">
+			<table class="table fmt">
+				<thead>
+					<tr>
+						<th style="width:22%">Check</th><th style="width:28%">Formats</th><th>What it catches</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each integrityChecks as c (c.check)}
+						<tr>
+							<td><strong>{c.check}</strong></td>
+							<td><Inline text={c.formats} /></td>
+							<td><Inline text={c.catches} /></td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+
+		<div class="cols-tight sub">
+			<div>
+				<h3>A damaged file is still measured</h3>
+				<p class="measure">
+					crête is a meter, not a repair tool: it reports what the bytes decode to and marks every
+					affected number untrustworthy. That separation is what keeps the intact-file path
+					bit-identical to the one that existed before these checks — verified across
+					<strong>62 files</strong> spanning FLAC, WAV (integer and float), AIFF, RF64, Wave64, ALAC,
+					TrueHD, AC-3 and DTS-HD MA in mono, stereo, quad, 5.1 and 7.1.
+				</p>
+			</div>
+			<div>
+				<h3>Always present, so it can be tested</h3>
+				<p class="measure">
+					Every warning also appears in <code>-f json</code> under <code>warnings</code>, which is
+					always emitted — an empty array is the positive statement "nothing was wrong", rather than
+					the absence of evidence a missing key would be. <code>num_tracks</code> counts what was
+					<em>measured</em>, so a file that failed to decode contributes a warning and no track. The
+					run exits <strong>2</strong>.
+				</p>
+			</div>
+			<div>
+				<h3>The limit, stated plainly</h3>
+				<p class="measure">
+					<strong>WAV and AIFF carry no checksum.</strong> Altered sample values in them are
+					undetectable — by crête or by any other meter — because a run of zeros inside a
+					<code>data</code> chunk is indistinguishable from a passage of digital silence the artist
+					put there. Only length and range can be checked; FLAC is the one that can prove itself. The
+					test suite asserts that a WAV with 4 KB of zeros written into its audio comes back
+					<em>clean</em>, so the blind spot stays visible in a green run.
+				</p>
+			</div>
+		</div>
+
+		<pre class="term">{`Warning: 04 - damaged.flac: FLAC: CORRUPT -- 1 of 215 frames failed the CRC-16 check (0.5%).
+Warning: 04 - damaged.flac: FLAC: TRUNCATED -- STREAMINFO declares 882000 samples per channel but 877904 decoded (4096 missing, 0.5%).
+Warning: 04 - damaged.flac: CORRUPT -- sample peak 45.32 dBFS on 16-bit integer PCM, which cannot exceed 0 dBFS.
+Error:   05 - unreadable.flac: FLAC: invalid magic`}</pre>
+	</section>
+
+	<section class="section">
+		<p class="kicker">03 — The FFmpeg tier</p>
 		<div class="cols-tight">
 			<div>
 				<h2>Opt-in, LGPL-only, decode-only, statically linked</h2>
@@ -144,7 +219,7 @@
 	</section>
 
 	<section class="section">
-		<p class="kicker">03 — Disc audio</p>
+		<p class="kicker">04 — Disc audio</p>
 		<h2>Three ways a Blu-ray will hand you the wrong number</h2>
 		<p class="intro">
 			Disc audio is where a meter quietly stops measuring what is on the disc. Each of these was
@@ -271,7 +346,7 @@ Layout:   7.1 · L R C LFE Lss Rss Lrs Rrs
 	</section>
 
 	<section class="section">
-		<p class="kicker">04 — DSD</p>
+		<p class="kicker">05 — DSD</p>
 		<h2>A clean-room decimation kernel, on three declared axes</h2>
 		<div class="cols-tight">
 			<div>
@@ -357,7 +432,7 @@ Layout:   7.1 · L R C LFE Lss Rss Lrs Rrs
 	</section>
 
 	<section class="section">
-		<p class="kicker">05 — SACD disc images</p>
+		<p class="kicker">06 — SACD disc images</p>
 		<h2>The disc is the input. Both areas of it.</h2>
 		<p class="intro">
 			SACD rips circulate overwhelmingly as <code>.iso</code>, so for a meter with this much DSD
@@ -400,6 +475,18 @@ crete --sacd-area stereo       album.iso`}</pre>
 					returns peak <strong>−5.489</strong> / RMS <strong>−19.753</strong> against the −5.49 /
 					−19.75 already recorded for that album from a <code>.dsf</code> rip. Every non-ISO path was
 					compared byte-for-byte across the change: FLAC, AC-3, TrueHD, WAV and DFF all identical.
+				</p>
+				<p class="note spaced">
+					<strong>Gated since 0.17.0</strong>, and not before — the reader and the DST decoder were
+					validated by hand once and then left, which is uncomfortable for code whose failure mode is
+					silence. The suite measures a <em>reduced</em> image: the first tracks of each area, the
+					multichannel one relocated so the file need not span the 1.85 GB gap before it,
+					<strong>229 MB</strong> instead of ~4 GB. Every audio sector in it is the disc's own bytes;
+					only the TOC fields describing extent are rewritten, and the builder measures every kept
+					track in both the reduced and the full image and requires identical results, so its own
+					address arithmetic cannot certify its own mistake. 6 passed / 2 skipped on its first weekly.
+					The 2 skips are the <code>.dsf</code> parity tier, which is written but needs the DSD64
+					corpus staged alongside and so is not running in CI yet.
 				</p>
 			</div>
 		</div>
@@ -525,7 +612,7 @@ crete --sacd-area stereo       album.iso`}</pre>
 	</section>
 
 	<section class="section">
-		<p class="kicker">06 — MQA</p>
+		<p class="kicker">07 — MQA</p>
 		<h2>Reported unconditionally. There is no flag to turn it off.</h2>
 		<p class="intro">
 			MQA is a lossy codec delivered inside an ordinary lossless-looking container — 44.1 or 48 kHz,
@@ -581,7 +668,7 @@ reconstructed (no open MQA decoder exists).
 	</section>
 
 	<section class="section">
-		<p class="kicker">07 — Build &amp; platforms</p>
+		<p class="kicker">08 — Build &amp; platforms</p>
 		<h2>One executable, everywhere it is built</h2>
 		<div class="cols-tight">
 			<div>

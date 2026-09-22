@@ -262,6 +262,12 @@
 	<section class="section">
 		<p class="kicker">09 — Exit status</p>
 		<h2>A meter that measured nothing has not succeeded</h2>
+		<p class="intro">
+			Three codes, and the new one is the one worth wiring into a script. Since 0.17.0
+			<code>0</code> means every input decoded cleanly rather than “something came back”, so a run
+			that silently averaged a damaged track into an album value can no longer exit the same way a
+			clean one does.
+		</p>
 		<div class="rows">
 			{#each exits as e (e.code)}
 				<div class="exit">

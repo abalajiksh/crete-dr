@@ -1,6 +1,13 @@
 // Content for the Testing page. Figures are from the harness's own weekly
-// reports (#53–#73) as recorded in the Crete working record; the suite table
+// reports (#53–#77) as recorded in the Crete working record; the suite table
 // mirrors what crete-pytest actually gates.
+//
+// Comparison counts, flag counts and per-metric averages are read off the
+// archived per-suite detailed reports for weekly #77 — the first run on 0.17.0
+// and the first to carry the INTEGRITY and SACD suites. Every one of the 15
+// reports #73 also produced is byte-identical to its #73 counterpart apart from
+// the version line in the header, so a figure carried from #73 is still current
+// by measurement rather than by assumption.
 
 /** The pipeline, corpus to verdict. */
 export const pipeline = [
@@ -54,7 +61,7 @@ export const oracles = [
 	}
 ];
 
-/** What each suite gates, and where it stood at weekly #73. */
+/** What each suite gates, and where it stood at weekly #77. */
 export const suites = [
 	{
 		name: 'QUALIFICATION',
@@ -82,14 +89,14 @@ export const suites = [
 		gates: 'The 1-channel path and the dual-mono stereo path',
 		oracle: 'MAAT',
 		corpus: 'Turtles 96/24 dual-mono + its `[M]` stems',
-		latest: '330 comparisons, **zero flags**'
+		latest: '341 comparisons, **zero flags**'
 	},
 	{
 		name: 'SURROUND',
 		gates: '5.1 channel weighting, LFE exclusion, per-channel DR',
 		oracle: 'MAAT on 2-channel stems',
 		corpus: '3 × 5.1 albums, 45 tracks × 6 channels',
-		latest: '1620 comparisons'
+		latest: '1620 comparisons, 3 flags'
 	},
 	{
 		name: 'QUADIO',
@@ -117,28 +124,28 @@ export const suites = [
 		gates: 'Container-independence: identical metrics across WAV, FLAC, AIFF, AIFF-C `sowt`, RF64, Wave64',
 		oracle: 'crête vs crête',
 		corpus: '6 albums transcoded every way',
-		latest: 'Δ 0.000'
+		latest: '704 comparisons, **Δ 0.000**'
 	},
 	{
 		name: 'CUE',
 		gates: 'Cue slicing against the equivalent per-track album',
 		oracle: 'crête vs crête',
 		corpus: 'Monolithic albums with sheets',
-		latest: 'Δ 0.000'
+		latest: '132 comparisons, **Δ 0.000**'
 	},
 	{
 		name: 'FFMPEG_PARITY',
 		gates: 'ALAC through FFmpeg against the native FLAC decode',
 		oracle: 'crête vs crête',
-		corpus: '105 comparisons',
-		latest: 'Δ 0.000'
+		corpus: '5 ALAC albums against their FLAC equivalents',
+		latest: '1672 comparisons, **Δ 0.000**'
 	},
 	{
 		name: 'DSD_PARITY',
 		gates: 'The DSF reader against the DFF deinterleaver',
 		oracle: 'crête vs crête',
 		corpus: 'One album, deliberately — it proves a property of the code',
-		latest: 'Δ ≤ 0.01'
+		latest: '264 comparisons, max Δ 0.06 (Min PSR); DR 0.000'
 	},
 	{
 		name: 'DSD_ROUNDTRIP',
@@ -146,6 +153,20 @@ export const suites = [
 		oracle: 'crête vs crête, two-tier',
 		corpus: 'Thriller DSD64',
 		latest: '4.5e-07 dB order statistics'
+	},
+	{
+		name: 'SACD',
+		gates: 'The Scarlet Book walk, both areas, and the DST decoder',
+		oracle: 'Recorded values; `.dsf` extraction, not yet wired',
+		corpus: 'A reduced DSOTM image, 229 MB, plus an ISO9660 negative control',
+		latest: '6 passed / 2 skipped, first weekly'
+	},
+	{
+		name: 'INTEGRITY',
+		gates: 'The damaged-input contract: warnings, exit 2, and no crash',
+		oracle: 'None needed — synthetic, seeded, redistributable',
+		corpus: 'Built from a fixed seed into a deterministic zip',
+		latest: '**19/19**, first weekly'
 	},
 	{
 		name: 'CROSSARCH',
@@ -156,37 +177,43 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.16.1. */
+/** Everything currently open, with the number attached. Complete as of 0.17.0. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
 		measure:
-			'DR reads +1…+3 higher than at 44.1 kHz; both tools agree on direction, not magnitude. Every DSD album-level mismatch on record occurs only at this rate. 44.1 kHz is 8/8 clean.',
+			'DR reads +1…+3 higher than at 44.1 kHz; both tools agree on direction, not magnitude. At 44.1 kHz the continuous per-track DR comparison flags **nothing** on any of the 8 DSD albums — in weekly #77 the only `DR (PMF) raw` flags in the whole run are 3 tracks of `Thriller_DSD64@352800` — and album DR matches on **7 of 8**. The exception is not rate-related: `BoneyM_10k_DSD128@44100` misses a `.5` boundary by **0.020 dB**, which is an accuracy question and no aggregation rule can fix it. At 352.8 kHz `Thriller_DSD64` mismatches at album level *and* on 4 of 9 tracks, maximum integer delta 2.',
 		status: 'Documented, deliberate'
 	},
 	{
 		what: 'Min PSR diverges from the reference',
 		measure:
-			'Average |Δ| 0.611 dB, max 2.89 — about seven times the next-worst metric. MAAT’s figure was reverse-engineered as a 0.5 dB/s decaying peak-hold; crête implements AES eBrief 373. A decode-versus-formula experiment proved it is a formula difference, not a decode artefact.',
+			'Average |Δ| 0.598 dB across 411 comparisons in weekly #77, max 2.89 — about eight times the next-worst metric. MAAT’s figure was reverse-engineered as a 0.5 dB/s decaying peak-hold; crête implements AES eBrief 373. A decode-versus-formula experiment proved it is a formula difference, not a decode artefact.',
 		status: 'Closed as won’t-fix'
 	},
 	{
-		what: 'Disc audio has no external oracle',
+		what: 'Disc audio and SACD have no external oracle',
 		measure:
-			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. SACD and DST are now in the same position.',
+			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. DST sits in the same position. For SACD the right comparison is **written** and is the strongest gate in that suite — crête on the ISO must equal crête on the `.dsf` extracted from the same disc, two independent container readers over one decode chain — but it is **not running in CI**: it needs the DSD64 corpus staged beside the SACD one, and wiring that through the corpus-reuse mechanism would make the whole suite skip whenever the sibling was not ready. Those are the 2 skips in its 6-passed / 2-skipped result.',
 		status: 'Open, not a blocker'
 	},
 	{
-		what: 'SACD is not in the weekly harness yet',
+		what: 'The SACD suite gates drift, not correctness',
 		measure:
-			'The intended gate is crête-on-the-ISO against crête on an external extraction of the same disc — crête versus crête, needing no outside meter. What has been run is narrower and passed: all ten stereo-area track durations on the 2018 DSOTM disc match the published running order, and one track returns peak −5.489 / RMS −19.753 against the −5.49 / −19.75 already recorded from a `.dsf` rip of the same album. The extraction comparison is worth running once; the suite is not written.',
-		status: 'Open'
+			'Closed since 0.16.1: the reader and the DST decoder had **no automated test of any kind** until 0.17.0, which is uncomfortable for code whose failure mode is silence — each of the three format traps found while writing it produced audible output and a plausible DR. The suite now measures a **reduced** image, 229 MB instead of ~4 GB, every audio sector the disc’s own bytes and only the extent fields of the TOC rewritten; the builder’s `--verify` measures every kept track in both the reduced and the full image and requires identical results, so its own address arithmetic cannot certify its own mistake. **6 passed / 2 skipped** on its first weekly, #77. Until the `.dsf` tier runs, what it gates is drift against recorded values rather than correctness against an oracle.',
+		status: 'Gated, narrowly'
 	},
 	{
 		what: 'DST decoding is slow',
 		measure:
 			'Roughly 2× realtime for six channels — a 43-minute 5.1 disc takes about 20 minutes. DST interleaves every channel through one arithmetic decoder, so no parallelism exists inside a frame; the prediction history is reinitialised per frame, so frames are independent and could be decoded in parallel. Not done.',
 		status: 'Open, known fix'
+	},
+	{
+		what: 'Altered samples in WAV and AIFF are undetectable',
+		measure:
+			'Neither container carries a checksum, so a changed sample value cannot be caught — by crête or by any other meter — because a run of zeros inside a `data` chunk is indistinguishable from digital silence the artist put there. Only declared length and the 0 dBFS range check apply. FLAC is the one native format that can prove itself, through frame CRC-8 and CRC-16. The `integrity` suite **asserts** the blind spot: a WAV with 4 KB of zeros written into its audio must come back clean, so a green run keeps the limitation visible rather than assuming it away.',
+		status: 'Format-limited, asserted'
 	},
 	{
 		what: 'Object audio is measured as its bed',
@@ -239,7 +266,7 @@ export const openItems = [
 	{
 		what: 'The new GUI bands were never looked at',
 		measure:
-			'0.16.1’s SACD, cue and stream-picker bands are verified by construction — both front-ends call one collector — and headlessly, which is not the same as having been seen. The SACD row’s trailing hint is long, so narrow window widths are the case to check. The results-table footer clipping in 0.12.0 is precisely the class of defect a suite cannot catch.',
+			'0.16.1’s SACD, cue and stream-picker bands are verified by construction — both front-ends call one collector — and headlessly, which is not the same as having been seen. 0.17.0 adds warnings to that surface without adding a test that anyone looked at them either. The SACD row’s trailing hint is long, so narrow window widths are the case to check. The results-table footer clipping in 0.12.0 is precisely the class of defect a suite cannot catch.',
 		status: 'Open'
 	},
 	{

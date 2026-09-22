@@ -98,11 +98,11 @@ export const builds = [
 export const limits = [
 	{
 		head: '44.1 kHz is the parity-guaranteed DSD rate.',
-		body: '88.2 / 176.4 / 352.8 kHz output is offered for analysis, not parity — retained ultrasonic noise-shaping inflates DR by +1…+3 there.'
+		body: '88.2 / 176.4 / 352.8 kHz output is offered for analysis, not parity — retained ultrasonic noise-shaping inflates DR by +1…+3 there. At the default rate the per-track DR comparison flags nothing on any of the 8 DSD albums and album DR matches on 7 of 8; the exception misses a `.5` boundary by 0.020 dB and is an accuracy question, not a rate one.'
 	},
 	{
 		head: 'Min PSR disagrees with the reference by design.',
-		body: 'MAAT uses a 0.5 dB/s decaying peak-hold; crête implements the published AES eBrief 373 formula. Average delta 0.611 dB — the worst metric in the suite.'
+		body: 'MAAT uses a 0.5 dB/s decaying peak-hold; crête implements the published AES eBrief 373 formula. Average delta 0.598 dB over 411 comparisons — the worst metric in the suite.'
 	},
 	{
 		head: 'MQA is detected, never decoded.',
@@ -113,12 +113,16 @@ export const limits = [
 		body: 'There is no renderer in the chain. Object metadata is discarded, and since 0.15.0 the output names the profile and marks the layout as a bed. Auro-3D cannot be identified this way and is not attempted.'
 	},
 	{
-		head: 'Disc-audio formats have no external oracle.',
-		body: 'TrueHD / DTS-HD MA / AC-3 are gated against crête’s own recorded values and against the LPCM carrier of the same master — nothing outside crête. SACD and DST now sit in the same position.'
+		head: 'Disc audio and SACD have no external oracle.',
+		body: 'TrueHD / DTS-HD MA / AC-3 are gated against crête’s own recorded values and against the LPCM carrier of the same master — nothing outside crête, and DST sits in the same position. The SACD comparison that would settle it, crête on the ISO against crête on the `.dsf` extracted from the same disc, is written but is not running in CI.'
 	},
 	{
 		head: 'DST decoding runs at about 2× realtime.',
 		body: 'Six channels through one arithmetic decoder, which cannot be parallelised inside a frame — a 43-minute 5.1 disc takes roughly 20 minutes. Frames are independent, so this is fixable and not yet fixed.'
+	},
+	{
+		head: 'Altered samples in WAV and AIFF cannot be caught.',
+		body: 'Neither container carries a checksum, so a changed sample value is undetectable by crête or any other meter — only declared length and the 0 dBFS range check apply. FLAC proves itself through frame CRC-8 and CRC-16. The test suite asserts the blind spot rather than assuming it away.'
 	},
 	{
 		head: 'The 0.16.1 GUI bands have not been looked at.',
@@ -164,6 +168,11 @@ export const reach = [
 		head: 'One binary, and nothing to install',
 		state: 'shipped',
 		body: 'The default build is a single C++17 translation unit with no external libraries and no build step beyond `make`; `STATIC=1` links it fully. MIT plus BSD-2-Clause for the DSD engine, so the whole measurement path can be read, audited and rebuilt — which is the one thing a closed reference cannot offer, however good its numbers are.'
+	},
+	{
+		head: 'A damaged file is named, not silently scored',
+		state: 'shipped',
+		body: 'Since 0.17.0 crête verifies FLAC frame CRC-8 and CRC-16, checks every declared length against what actually decoded, and rejects a sample peak above 0 dBFS on integer PCM as arithmetically impossible. The file is still measured — crête is a meter, not a repair tool — but every affected number is flagged, listed in JSON under a **`warnings`** array that is always present, and reflected in **exit code 2**. Before this, a FLAC with one bad sector took an album from DR13 to DR9 at a sample peak of +48.16 dBFS and exited 0.'
 	},
 	{
 		head: 'Disc audio measured as authored',

@@ -39,6 +39,29 @@ export const native = [
 	{ name: 'Cue sheet', ext: ['.cue'], note: 'Splits a monolithic file into per-track results.' }
 ];
 
+/** What each container lets crête verify about itself, and what it does not.
+    The three checks are the ones 0.17.0 added; the row order is the README's. */
+export const integrityChecks = [
+	{
+		check: 'Frame CRC-8 + CRC-16',
+		formats: 'FLAC',
+		catches:
+			'An altered sample value — the bit-flip nothing else can see. The only detector a format hands over for free.'
+	},
+	{
+		check: 'Declared vs decoded length',
+		formats: 'FLAC `STREAMINFO`, WAV / RF64 / Wave64 `data`, AIFF `COMM`/`SSND`',
+		catches:
+			'Truncation, an interrupted copy, frames lost to a resync. `STREAMINFO`’s sample count was already read as an allocation hint and never compared with the decode.'
+	},
+	{
+		check: 'Sample peak ≤ 0 dBFS',
+		formats: 'Any integer PCM',
+		catches:
+			'A decode that produced values the format cannot represent. Deliberately not applied to float PCM, decimated DSD or FFmpeg’s float decoders, all of which can legitimately exceed full scale.'
+	}
+];
+
 /** The SACD area selector. Not a DSD axis — it picks which recording to decode. */
 export const sacdArea = {
 	flag: '--sacd-area auto | stereo | multichannel',

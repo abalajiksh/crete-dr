@@ -303,7 +303,7 @@
 			<div>
 				<h2>Min PSR: crête follows the paper, the reference follows a peak-hold</h2>
 				<p class="measure">
-					Min PSR is the worst-agreeing metric in the entire suite — average |Δ| 0.611 dB, max 2.89,
+					Min PSR is the worst-agreeing metric in the entire suite — average |Δ| 0.598 dB, max 2.89,
 					roughly seven times the next-worst. It is also the one metric where that gap is fully
 					explained and deliberately left alone.
 				</p>

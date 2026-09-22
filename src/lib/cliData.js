@@ -208,7 +208,7 @@ export const formats = [
 	{
 		flag: 'json',
 		name: 'JSON',
-		note: 'Every metric for every track, the full `channel_metrics` array, the `standards` map, and the axes the result was produced under. Needs a `cli-json` build. This is what the pytest harness reads — it never scrapes text.'
+		note: 'Every metric for every track, the full `channel_metrics` array, the `standards` map, the always-present `warnings` array, and the axes the result was produced under. Needs a `cli-json` build. This is what the pytest harness reads — it never scrapes text.'
 	}
 ];
 
@@ -223,6 +223,11 @@ export const provenance = [
 		what: 'The LFE scoring rule, and how many channels it left scored.'
 	},
 	{ key: 'standards', when: 'top level', what: 'Which specification governs each reported field.' },
+	{
+		key: 'warnings',
+		when: 'every result',
+		what: 'Failed decodes, CRC mismatches, truncation and the multi-stream choice. Always present, so an empty array is the positive statement that nothing was wrong.'
+	},
 	{
 		key: 'dsd_mode · dsd_filter · dsd_out_rate',
 		when: 'DSD sources',
@@ -240,13 +245,18 @@ export const provenance = [
 export const exits = [
 	{
 		code: '0',
-		when: 'At least one track was measured.',
-		note: 'A partial success exits 0. Per-file failures inside an album are reported on stderr and do not fail the run.'
+		when: 'Every input decoded cleanly.',
+		note: 'Not “something was measured”. Since 0.17.0 a clean exit is a statement about the whole run, which is what makes it worth testing — a partial success no longer hides inside it.'
 	},
 	{
 		code: '1',
 		when: 'Nothing could be analysed, or a flag was rejected.',
 		note: 'A meter that measured nothing has not succeeded — and with `-f json` it emits no JSON at all, so a caller trusting the exit code would parse an empty string. That is exactly how a stale FFmpeg build with no TrueHD or DTS decoder surfaced in CI: as a `JSONDecodeError` instead of crête’s own error line.'
+	},
+	{
+		code: '2',
+		when: 'Completed, but some input failed to decode or was damaged.',
+		note: 'The run produced numbers and they are **unreliable** — including any album value computed from them, because a damaged track is averaged into it. Added in 0.17.0, alongside the `warnings` array: crête still measures a damaged file, because it is a meter and not a repair tool, but it will not let the result pass for a clean one. `num_tracks` counts what was *measured*, so a file that failed to decode contributes a warning and no track.'
 	}
 ];
 
