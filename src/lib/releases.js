@@ -34,6 +34,31 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.18.1',
+		date: '2026-09-23',
+		impact: ['identical', 'additive'],
+		title: 'A DVD-Audio title-set reader, and the meter left alone',
+		body: [
+			'A patch bump rather than a minor one, deliberately: `dvda.hpp` and the `dvda-info` tool are additive and **the meter itself is unchanged**. `crete --version` is recorded in every harness run, so bumping the minor version when no measured number moves would put a new version string beside identical results.',
+			'A DVD-Audio title set is not one recording. Fleetwood Mac’s *Rumours* (2001, Warner) is **one** title set holding **four** titles — a 96 kHz 5.1 mix, a 96 kHz stereo mix, a 48 kHz 5.1 version and a one-second tail — **39 tracks** across five 1 GB `.aob` fragments whose boundaries do not align with the titles. Read as a single stream, which is what 0.18.0 does, crête measures the 5.1 mix up to the first group change and warns: honest, and nearly useless on a real disc. `dvda.hpp` parses the disc’s own tables — the audio formats, the titles and every track’s length. Parsing only, no decode and no FFmpeg, so it builds in the zero-dependency tier.',
+			'**Checked three ways before it was trusted**, because a plausible-but-wrong parse of a binary table is the failure this project keeps finding. Arithmetic, and this is the one that settles it: each title states its own length in 90 kHz ticks and each track record states its own, in separate structures, and on the reference disc the track lengths sum to the title total **exactly** on all four titles — 240063900, 237918150, 216438000 and 94800. A wrong offset or endianness cannot produce four exact matches, and `validate()` asserts it. Agreement with the audio: the three format entries decode to 24-bit 96 kHz 6-channel, 24-bit 96 kHz 2-channel and 24-bit 48 kHz 6-channel — the same three groups, in the same order, that decoding the AOBs had already found by bisecting for where the channel count changes. And agreement with the record: the stereo title’s track lengths match the published running order to the second on most tracks.',
+			'Only the two channel assignments confirmed against real audio are mapped; the other 19 return 0, meaning “ask the decoder”, because publishing a guess would put an unverified number beside measured ones. **Not done, and recorded with its evidence: per-track byte extents.** Durations do not give offsets — MLP is variable-rate — so slicing a title set by track needs one more table. There is a candidate for it, in the right shape; it is a hypothesis until it meets the standard the track table just met, since a wrong byte offset in a lossless stream yields audio that plays and a DR that looks reasonable.'
+		]
+	},
+	{
+		version: '0.18.0',
+		date: '2026-09-23',
+		impact: ['identical', 'additive'],
+		title: 'DVD-Video and DVD-Audio title sets',
+		body: [
+			'A DVD is the first container crête reads that is not one file holding one stream. The spec caps a file at 1 GB, so a title is split at a pack boundary and numbered — `VTS_02_1.VOB`, `_2`, `_3`; `ATS_01_1.AOB` … `_5.AOB` — and measuring the pieces separately is wrong twice over: each is metered alone, and the split lands wherever 1 GB fell, so the 3 s DR block straddling it belongs to neither piece. **Point crête at any one fragment and it measures the whole title set**, presented to FFmpeg as a single stream. On the corpus: 25.324 s + 24.289 s read separately, **49.632 s** read as a set — 19 ms more, that being the MLP frame the split cut in half. DVD LPCM is exact either way, because its packets are self-contained within a pack.',
+			'It also removes a trap. The FFmpeg stream **index is not stable across fragments of one title**: on the DSOTM 50th DVD the same three substreams come back as `2=ac3 3=ac3 4=lpcm` in the first fragment and `2=lpcm 3=ac3 4=ac3` in the second, because the index follows order of first appearance in the program stream. A `--stream` pin correct for one fragment selects a different *codec* in the next. Reading the set as one stream means one probe and one answer.',
+			'**Two guards against a silently wrong answer, both found by building this.** A DVD-Audio title set can hold several audio groups, and the group boundary does not align with the fragments — on *Rumours* it falls partway through `ATS_01_3.AOB`. FFmpeg says only “Parity check failed” and “DTS discontinuity” on stderr and decodes on into a resampler configured for the previous format; crête now stops at the change, measures the first group, warns, and **exits 2**. And the channel layout and rate now follow the **first decoded frame** rather than the container probe, which can read deep enough to reach a *later* group and report 2 channels for a stream whose first frame is 6. That is the same decision already taken for the sample format, extended to the two fields the probe can get wrong in the same way — and it is the behavioural change to every FFmpeg decode that makes this a minor bump.',
+			'**Nothing else moved, and that is measured rather than argued.** The whole JSON tracks array is byte-identical to a worktree build of `main`, linked against the same rebuilt FFmpeg so the comparison isolates the source change, across all seven disc-audio carriers — TrueHD 7.1 Atmos, AC-3 5.1, DTS-HD MA 5.1 and 2.0 at 96 kHz, LPCM 5.1 96 kHz and 2.0 192 kHz, and the six-stream clip: **7 identical, 0 differing**. The FFmpeg tier gains the program-stream demuxer and the two DVD LPCM decoders, all native LGPL, so its licensing position is unchanged. The new DVD suite is 10/10, and fails 10/10 against the build before it.',
+			'**One known wart, measured and left alone.** In a `.vob` the compact FFmpeg lists one more audio stream than the disc carries: it cannot type the MPEG-2 video, content-probes it and matches it as MP3, so three audio streams list as four and the extra decodes to 0.34 s at 16 kHz with a +23 dBFS peak. Enabling the video parser and then the decoder was tried and changed nothing, and it cannot be filtered crête-side because MPEG audio is a legal DVD audio format. Automatic selection still returns the real stream and `--stream` reaches every genuine one; only the listing is wrong.'
+		]
+	},
+	{
 		version: '0.17.0',
 		date: '2026-09-21',
 		impact: ['identical', 'additive'],

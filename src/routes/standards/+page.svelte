@@ -271,6 +271,13 @@
 					counter-examples. <code>--dr-lfe include</code> matches it so the two can be compared directly
 					instead of argued about.
 				</p>
+				<p class="measure">
+					And the flag now has an oracle, not just an argument. Against foobar's own logs for the
+					three 5.1 albums, <code>include</code> reproduces foobar's album DR <strong>exactly</strong>
+					on all three, with per-channel DR agreeing to a mean of 0.036 dB over 264 values. The control
+					is a 4.0 album: with no LFE the two rules are the same rule, and there the flag changes
+					nothing byte for byte while every track's integer DR matches foobar's.
+				</p>
 				<table class="ab">
 					<thead>
 						<tr>

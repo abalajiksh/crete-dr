@@ -1,13 +1,14 @@
 // Content for the Testing page. Figures are from the harness's own weekly
-// reports (#53–#77) as recorded in the Crete working record; the suite table
+// reports (#53–#85) as recorded in the Crete working record; the suite table
 // mirrors what crete-pytest actually gates.
 //
 // Comparison counts, flag counts and per-metric averages are read off the
-// archived per-suite detailed reports for weekly #77 — the first run on 0.17.0
-// and the first to carry the INTEGRITY and SACD suites. Every one of the 15
-// reports #73 also produced is byte-identical to its #73 counterpart apart from
-// the version line in the header, so a figure carried from #73 is still current
-// by measurement rather than by assumption.
+// archived per-suite detailed reports for weekly #85 — the first run on 0.18.0
+// and the first to carry the DVD suite. Every one of its 15 detailed reports is
+// byte-identical to its #77 counterpart below the header, and #77's were in turn
+// identical to #73's apart from one added header line, so a figure carried from
+// #73 or #77 is still current by measurement rather than by assumption. #81 and
+// #82 are not used: both went unstable on the same three corpus-staging faults.
 
 /** The pipeline, corpus to verdict. */
 export const pipeline = [
@@ -47,7 +48,7 @@ export const oracles = [
 	{
 		rank: 'Tier 2 · cross-check',
 		name: 'foobar2000 DR Meter',
-		text: 'Retired as a routine oracle, kept as an *independent second implementation*. That distinction earned its keep: on 264 per-channel values foobar and MAAT agreed with each other to a mean of 0.006 dB while crête sat 0.095 from both — proof the residual was crête’s, not reference noise.'
+		text: 'Retired as a routine oracle, kept as an *independent second implementation*. That distinction earned its keep: on 264 per-channel values foobar and MAAT agreed with each other to a mean of 0.006 dB while crête sat 0.095 from both — proof the residual was crête’s, not reference noise. It is back for **one rule MAAT cannot adjudicate**: MAAT reads at most two channels, so no MAAT row holds an LFE, and foobar is the only measured implementation of the all-channel rule `--dr-lfe include` reproduces. Validated before any row was written, pairing by track number: album DR matches **exactly** on all three 5.1 albums, per-channel DR to a mean of 0.036 dB over 264 values, and on 4.0 — where the two rules are the same rule — every track integer matches and the flag is byte-inert. Added after weekly #85, so not yet through a weekly.'
 	},
 	{
 		rank: 'Tier 3 · analytic',
@@ -61,7 +62,7 @@ export const oracles = [
 	}
 ];
 
-/** What each suite gates, and where it stood at weekly #77. */
+/** What each suite gates, and where it stood at weekly #85. */
 export const suites = [
 	{
 		name: 'QUALIFICATION',
@@ -159,14 +160,21 @@ export const suites = [
 		gates: 'The Scarlet Book walk, both areas, and the DST decoder',
 		oracle: 'Recorded values; `.dsf` extraction, not yet wired',
 		corpus: 'A reduced DSOTM image, 229 MB, plus an ISO9660 negative control',
-		latest: '6 passed / 2 skipped, first weekly'
+		latest: '6 passed / 2 skipped'
+	},
+	{
+		name: 'DVD',
+		gates: 'Title sets read as one stream, the group-change stop, stream selection',
+		oracle: 'crête vs crête — each disc’s lossless stream against the same audio as FLAC',
+		corpus: 'Pack-aligned byte ranges of one DVD-Video and one DVD-Audio',
+		latest: '**10/10**, first weekly'
 	},
 	{
 		name: 'INTEGRITY',
 		gates: 'The damaged-input contract: warnings, exit 2, and no crash',
 		oracle: 'None needed — synthetic, seeded, redistributable',
 		corpus: 'Built from a fixed seed into a deterministic zip',
-		latest: '**19/19**, first weekly'
+		latest: '**19/19**'
 	},
 	{
 		name: 'CROSSARCH',
@@ -177,7 +185,7 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.17.0. */
+/** Everything currently open, with the number attached. Complete as of 0.18.1. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
@@ -194,14 +202,32 @@ export const openItems = [
 	{
 		what: 'Disc audio and SACD have no external oracle',
 		measure:
-			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. DST sits in the same position. For SACD the right comparison is **written** and is the strongest gate in that suite — crête on the ISO must equal crête on the `.dsf` extracted from the same disc, two independent container readers over one decode chain — but it is **not running in CI**: it needs the DSD64 corpus staged beside the SACD one, and wiring that through the corpus-reuse mechanism would make the whole suite skip whenever the sibling was not ready. Those are the 2 skips in its 6-passed / 2-skipped result.',
+			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. DST sits in the same position. For SACD the right comparison is **written** and is the strongest gate in that suite — crête on the ISO must equal crête on the `.dsf` extracted from the same disc, two independent container readers over one decode chain — but it is **not running in CI**: it needs the DSD64 corpus staged beside the SACD one, and wiring that through the corpus-reuse mechanism would make the whole suite skip whenever the sibling was not ready. Those are the 2 skips in its 6-passed / 2-skipped result. DVD is the partial exception: foobar cannot open a `.vob` or `.aob`, but the suite already requires crête through the container to equal crête on the FLAC of the same audio exactly, so foobar measuring that FLAC reaches the container decode transitively — DR9 against DR9 on the DVD-Video LPCM, DR13 against DR13 on the DVD-Audio MLP. That tier was added after weekly #85.',
 		status: 'Open, not a blocker'
 	},
 	{
 		what: 'The SACD suite gates drift, not correctness',
 		measure:
-			'Closed since 0.16.1: the reader and the DST decoder had **no automated test of any kind** until 0.17.0, which is uncomfortable for code whose failure mode is silence — each of the three format traps found while writing it produced audible output and a plausible DR. The suite now measures a **reduced** image, 229 MB instead of ~4 GB, every audio sector the disc’s own bytes and only the extent fields of the TOC rewritten; the builder’s `--verify` measures every kept track in both the reduced and the full image and requires identical results, so its own address arithmetic cannot certify its own mistake. **6 passed / 2 skipped** on its first weekly, #77. Until the `.dsf` tier runs, what it gates is drift against recorded values rather than correctness against an oracle.',
+			'Closed since 0.16.1: the reader and the DST decoder had **no automated test of any kind** until 0.17.0, which is uncomfortable for code whose failure mode is silence — each of the three format traps found while writing it produced audible output and a plausible DR. The suite now measures a **reduced** image, 229 MB instead of ~4 GB, every audio sector the disc’s own bytes and only the extent fields of the TOC rewritten; the builder’s `--verify` measures every kept track in both the reduced and the full image and requires identical results, so its own address arithmetic cannot certify its own mistake. **6 passed / 2 skipped** on its first weekly, #77, and again in #85. Until the `.dsf` tier runs, what it gates is drift against recorded values rather than correctness against an oracle.',
 		status: 'Gated, narrowly'
+	},
+	{
+		what: 'A DVD-Audio title set measures as its first group',
+		measure:
+			'A title set can hold several mixes — *Rumours* carries a 96 kHz 5.1, a 96 kHz stereo and a 48 kHz 5.1 version in one, 39 tracks — and the group boundaries do not align with the file fragments. crête measures the first group as one stream, warns, and exits 2 rather than metering through the change. Since 0.18.1 `dvda-info` reads the titles and track lengths exactly, but durations do not give byte offsets in variable-rate MLP, and the table that would is a hypothesis until it meets the same arithmetic proof. So there is no per-track or per-title DVD-Audio measurement yet.',
+		status: 'Open, tables parsed'
+	},
+	{
+		what: 'A `.vob` lists one phantom audio stream',
+		measure:
+			'The compact FFmpeg cannot type the MPEG-2 video, content-probes it and matches it as MP3: three audio streams list as four, the extra decoding to 0.34 s at 16 kHz with a +23 dBFS peak. Adding the video parser and then the decoder changed nothing, and it cannot be filtered crête-side because MPEG audio is a legal DVD format. Automatic selection and every genuine `--stream` index are unaffected; the suite asserts those instead of an exact stream count.',
+		status: 'Known, left alone'
+	},
+	{
+		what: 'One LFE two oracles disagree with',
+		measure:
+			'DSOTM 5.1 `08 - Any Colour You Like`, LFE channel: foobar2000 reads 10.47 against crête’s 9.24, a 1.226 dB gap on a channel whose next-worst peer is 0.892 and everything else under 0.38. It is the **same track and channel** the MAAT stem comparison already flags as the one surround residual that never resolved, 1.38 → 1.23 across the quadratic-mean and block-set corrections. Two independent references, different paths, landing on one LFE makes it a lead rather than reference noise.',
+		status: 'Open, a lead'
 	},
 	{
 		what: 'DST decoding is slow',

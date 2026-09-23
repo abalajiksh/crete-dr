@@ -27,11 +27,11 @@
 
 	<section class="stats band">
 		<div class="stat">
-			<div class="stat-num">200</div>
-			<div class="stat-label">tests, weekly #77</div>
+			<div class="stat-num">210</div>
+			<div class="stat-label">tests, weekly #85</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">184</div>
+			<div class="stat-num">194</div>
 			<div class="stat-label">passed · 0 failed · 16 skipped</div>
 		</div>
 		<div class="stat">
@@ -131,6 +131,17 @@
 			containers, the joint true-peak LFE guard, the DST decoder, the shared input collector with its
 			natural-order fix, and the integrity checks. Each was argued to be a no-op on this corpus when it
 			shipped. This is the corpus agreeing, on every number it holds.
+		</p>
+		<p class="note narrow">
+			<strong>Weekly #85 is the first run on 0.18.0 and the first to carry DVD.</strong> The same
+			fifteen reports are identical to #77's below the header — the same 11,931 comparisons, 44 flags
+			and two album mismatches — so the identity now spans the DVD title-set reader and the change that
+			makes every FFmpeg decode take its channel layout and rate from the first frame. The new suite
+			went 10/10. Two runs sit between them and neither is counted: #81, the first on the new
+			x86-64 default agent and the first on a cold cache in a long time, and #82 both went unstable on
+			the same three tests. Staging, not measurement — crête was pointed at a directory holding only
+			another directory, does not recurse, and said so. The check meant to catch it counted files
+			recursively, and a recursive count cannot see a level of nesting.
 		</p>
 	</section>
 
@@ -629,7 +640,7 @@ s06_dtshd_ma_2.0_96k.mkv      DCA     EXACT  0.000e+00`}</pre>
 
 <Footer {version}>
 	{#snippet note()}
-		Harness figures from weekly runs #53–#77. The pytest harness lives in a separate private
+		Harness figures from weekly runs #53–#85. The pytest harness lives in a separate private
 		repository.
 	{/snippet}
 </Footer>

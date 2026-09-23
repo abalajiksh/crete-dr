@@ -64,8 +64,10 @@ machine. `bun install`, `bun run dev`, `bun run build`.
 **Every figure on this site is a real measurement from the Crete repo or the
 crete-pytest harness.** They were checked against those repos line by line when
 the site was built and re-checked at each weekly since — the current census is
-weekly `#77` at `200/184/0/16` tests, `11,931` comparisons over `51` albums,
-`44` flagged, `0.598 dB` average Min PSR, `273` cross-arch fields. Where a
+weekly `#85` (0.18.0) at `210/194/0/16` tests, `11,931` comparisons over `51`
+albums, `44` flagged, `0.598 dB` average Min PSR, `273` cross-arch fields. Its
+15 detailed reports are identical to `#77`'s below the header. `#81` and `#82`
+went unstable on corpus staging and are deliberately not the census. Where a
 figure belongs to a specific past experiment it stays pinned to it: `2241` DR
 comparisons and `0.0262` mean |Δ| are the #68→#69 block-set A/B, not a current
 count. If you change a number, you must have a source in one of those two repos

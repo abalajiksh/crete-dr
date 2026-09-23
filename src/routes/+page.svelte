@@ -44,8 +44,8 @@
 			<div class="stat-label">metric comparisons per weekly run</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">184 / 0</div>
-			<div class="stat-label">passed / failed, weekly #77</div>
+			<div class="stat-num">194 / 0</div>
+			<div class="stat-label">passed / failed, weekly #85</div>
 		</div>
 		<div class="stat">
 			<div class="stat-num accent">0.000e+00</div>

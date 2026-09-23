@@ -17,7 +17,7 @@
 	<title>Formats — crête</title>
 	<meta
 		name="description"
-		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DSD decimation, MQA detection and the platform matrix."
+		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DVD title sets, DSD decimation, MQA detection and the platform matrix."
 	/>
 </svelte:head>
 
@@ -612,7 +612,118 @@ crete --sacd-area stereo       album.iso`}</pre>
 	</section>
 
 	<section class="section">
-		<p class="kicker">07 — MQA</p>
+		<p class="kicker">07 — DVD title sets</p>
+		<h2>One title, several files, one stream</h2>
+		<p class="intro">
+			A DVD is the first container crête reads that is not one file holding one stream. The spec caps
+			a file at 1 GB, so a title's program stream is split at a pack boundary and numbered — and
+			metering the pieces separately is wrong twice over: each is metered alone, and the split lands
+			wherever 1 GB fell, so the 3 s DR block straddling it belongs to neither piece.
+		</p>
+
+		<div class="cols-tight">
+			<div>
+				<p class="measure">
+					<strong>Point crête at any one fragment and it measures the whole title set.</strong> The
+					pieces are presented to FFmpeg as a single stream through one demuxer, so the boundary costs
+					nothing. On the test corpus the joined MLP duration is 49.632 s against 25.324 + 24.289 s
+					read separately — 19 ms <em>longer</em>, that being the frame the split cut in half. DVD
+					LPCM joins exactly, 23.498 + 23.721 = 47.219 s either way, because its packets are
+					self-contained within a pack.
+				</p>
+				<p class="measure">
+					It also removes a trap. The FFmpeg stream <strong>index is not stable across fragments
+					of one title</strong>: on the DSOTM 50th DVD the same three substreams come back in a
+					different order in the second fragment than in the first, because the index follows order
+					of first appearance in the program stream. A <code>--stream</code> pin correct for one
+					fragment selects a different <em>codec</em> in the next. One stream means one probe and
+					one answer, which is what makes <code>--stream</code> meaningful here at all.
+				</p>
+			</div>
+			<div>
+				<pre class="term">{`VIDEO_TS/VTS_02_1.VOB  _2.VOB  _3.VOB   one 43-minute title
+AUDIO_TS/ATS_01_1.AOB  ...     _5.AOB   one DVD-Audio title set
+
+         VTS_02_1.VOB      VTS_02_2.VOB
+index 2  ac3               lpcm
+index 3  ac3               ac3
+index 4  lpcm              ac3`}</pre>
+				<h4 class="val-head">Validation</h4>
+				<p class="note">
+					Both test discs carry a lossless stream — MLP on the DVD-Audio, DVD LPCM on the DVD-Video —
+					and the corpus ships each decoded to FLAC, so crête through the disc container must equal
+					crête on the FLAC <strong>exactly</strong>: two independent decode paths over the same
+					samples, nothing to calibrate. The suite is <strong>10/10</strong> on its first weekly,
+					#85, and fails all ten against the build before it. The whole JSON tracks array is
+					byte-identical to 0.17.0 on all seven disc-audio carriers, so reading DVDs moved
+					nothing that was already measured.
+				</p>
+			</div>
+		</div>
+
+		<article class="case">
+			<h3>A DVD-Audio title set holds more than one mix</h3>
+			<div class="cols-tight">
+				<div>
+					<p class="measure">
+						Fleetwood Mac's <em>Rumours</em> (2001, Warner) is one title set holding four titles — a
+						96 kHz 5.1 mix, a 96 kHz stereo mix, a 48 kHz 5.1 version and a one-second tail — 39
+						tracks across five <code>.aob</code> fragments, and <strong>the group boundaries do not
+						align with the fragments</strong>. The 6-to-2-channel change falls partway through
+						<code>ATS_01_3.AOB</code>, so even a single <code>.aob</code> can cross one.
+					</p>
+					<p class="measure">
+						Left to itself FFmpeg decodes straight through the change into a resampler configured for
+						the previous format, and reports nothing but a parity-check failure and a timestamp
+						discontinuity on stderr. The numbers stay in range and nothing says they are meaningless.
+						crête stops at the change, measures the <strong>first group</strong>, names it, and exits
+						2 — a warning over the wrong numbers would be the silent wrong answer in camouflage.
+					</p>
+					<p class="measure">
+						The probe had the same blind spot one level up: it can read deep enough to reach a later
+						group and report 2 channels for a stream whose first frame is 6. So the channel layout and
+						rate now come from the <strong>first decoded frame</strong>, not the container — the
+						decision already taken for the sample format, extended to the two fields the probe can
+						get wrong the same way.
+					</p>
+				</div>
+				<div>
+					<pre class="term">{`Warning: audio format changes partway through
+this stream (a DVD-Audio title set holds several
+audio groups); measured the first group only,
+6 ch / 96000 Hz`}</pre>
+					<h4 class="val-head">Reading the disc's own tables</h4>
+					<p class="note">
+						<code>make dvda-info</code> builds a zero-dependency tool that parses a title set's
+						formats, titles and track lengths without decoding anything — one second on a 4.5 GB
+						title set. On <em>Rumours</em> the track lengths sum to each title's own stated total
+						<strong>exactly</strong>, on all four titles, in fields held in separate structures; a
+						wrong offset or byte order cannot produce four exact matches. The three format entries
+						agree, in order, with the three groups decoding had already found.
+					</p>
+					<p class="note spaced">
+						<strong>crête does not yet use it to measure per track or per title.</strong> Durations
+						do not give byte offsets — MLP is variable-rate — and the table that would is still a
+						hypothesis. A wrong offset into a lossless stream yields audio that plays and a DR that
+						looks reasonable, so it waits for the same arithmetic proof the track table met.
+					</p>
+				</div>
+			</div>
+		</article>
+
+		<p class="note rules">
+			<strong>One caveat on <code>--stream</code> for <code>.vob</code>:</strong> the compact FFmpeg
+			lists one more audio stream than the disc carries. It cannot identify the MPEG-2 video,
+			content-probes it and matches it as MP3, so three audio streams list as four and the extra
+			decodes to 0.34 s at 16 kHz with a +23 dBFS peak. A full FFmpeg types it correctly. It cannot be
+			filtered on crête's side, because MPEG audio is a legal DVD audio format. Automatic selection is
+			unaffected — it ranks by bitrate and the phantom has none — and every genuine stream is reachable
+			by index; only the listing is wrong.
+		</p>
+	</section>
+
+	<section class="section">
+		<p class="kicker">08 — MQA</p>
 		<h2>Reported unconditionally. There is no flag to turn it off.</h2>
 		<p class="intro">
 			MQA is a lossy codec delivered inside an ordinary lossless-looking container — 44.1 or 48 kHz,
@@ -668,7 +779,7 @@ reconstructed (no open MQA decoder exists).
 	</section>
 
 	<section class="section">
-		<p class="kicker">08 — Build &amp; platforms</p>
+		<p class="kicker">09 — Build &amp; platforms</p>
 		<h2>One executable, everywhere it is built</h2>
 		<div class="cols-tight">
 			<div>

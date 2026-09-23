@@ -110,7 +110,7 @@ export const flagGroups = [
 				values: 'N',
 				fallback: 'FFmpeg’s own pick',
 				effect: 'selection',
-				note: 'The audio stream to decode in a multi-stream container, indexed as `ffprobe -show_streams` prints it. With no `--stream`, FFmpeg ranks by bitrate and channel count — a reasonable default, but not the container’s `default` flag and **not stable across remuxes of the same content**. Whenever a file holds more than one audio stream crête says which one it measured, and records `stream_index` and `audio_stream_count` in JSON.'
+				note: 'The audio stream to decode in a multi-stream container, indexed as `ffprobe -show_streams` prints it. With no `--stream`, FFmpeg ranks by bitrate and channel count — a reasonable default, but not the container’s `default` flag and **not stable across remuxes of the same content**. Whenever a file holds more than one audio stream crête says which one it measured, and records `stream_index` and `audio_stream_count` in JSON. On a DVD the index is taken over the whole title set, since it is not stable from one `.vob` fragment to the next; the compact FFmpeg also lists one phantom stream per `.vob`, which automatic selection passes over because it ranks by bitrate and the phantom has none.'
 			}
 		]
 	},
@@ -256,7 +256,7 @@ export const exits = [
 	{
 		code: '2',
 		when: 'Completed, but some input failed to decode or was damaged.',
-		note: 'The run produced numbers and they are **unreliable** — including any album value computed from them, because a damaged track is averaged into it. Added in 0.17.0, alongside the `warnings` array: crête still measures a damaged file, because it is a meter and not a repair tool, but it will not let the result pass for a clean one. `num_tracks` counts what was *measured*, so a file that failed to decode contributes a warning and no track.'
+		note: 'The run produced numbers and they are **unreliable** — including any album value computed from them, because a damaged track is averaged into it. Added in 0.17.0, alongside the `warnings` array: crête still measures a damaged file, because it is a meter and not a repair tool, but it will not let the result pass for a clean one. `num_tracks` counts what was *measured*, so a file that failed to decode contributes a warning and no track. Since 0.18.0 a DVD-Audio title set whose audio format changes partway through exits 2 as well: crête measures the first group and says so rather than metering through the change.'
 	}
 ];
 

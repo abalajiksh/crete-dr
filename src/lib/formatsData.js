@@ -94,6 +94,21 @@ export const ffmpeg = [
 		name: 'E-AC-3 / AC-3',
 		ext: ['.mkv', '.eac3', '.ac3'],
 		note: 'Lossy disc audio. Channel bed only; the E-AC-3 5.1 core is what a JOC Atmos stream decodes to.'
+	},
+	{
+		name: 'DVD-Video',
+		ext: ['.vob'],
+		note: 'MPEG program stream: AC-3, DTS or LPCM beside MPEG-2 video. Any one fragment of a title measures the whole title set.'
+	},
+	{
+		name: 'DVD-Audio',
+		ext: ['.aob'],
+		note: 'MPEG program stream: MLP or LPCM, no video. Measures the first audio group of a title set and says so when there is more than one.'
+	},
+	{
+		name: 'DVD LPCM',
+		ext: ['.vob', '.aob'],
+		note: 'Lossless — DVD’s own LPCM framing, with its own header and big-endian samples, not plain PCM.'
 	}
 ];
 
@@ -123,6 +138,7 @@ export const buildCmds = [
 	{ cmd: 'make setup-imgui && make gui', note: null },
 	{ cmd: 'make gui-ffmpeg', note: null },
 	{ cmd: 'make dsd2wav', note: 'DSD → WAV exporter' },
+	{ cmd: 'make dvda-info', note: 'DVD-Audio title-set tables' },
 	{ cmd: 'make debug', note: 'asan + ubsan' },
 	{ cmd: 'make STATIC=1', note: 'fully static link' }
 ];

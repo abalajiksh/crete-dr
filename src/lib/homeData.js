@@ -88,7 +88,7 @@ export const builds = [
 	{
 		target: 'make cli-json-ffmpeg',
 		binary: 'crete-ffmpeg',
-		adds: 'ALAC, MP3, AAC, Opus, TrueHD, DTS-HD MA, AC-3, and the codec profile.'
+		adds: 'ALAC, MP3, AAC, Opus, TrueHD, DTS-HD MA, AC-3, DVD title sets, and the codec profile.'
 	},
 	{ target: 'make gui', binary: 'crete-gui', adds: 'SDL2 + Dear ImGui drag-and-drop app.' },
 	{ target: 'make gui-ffmpeg', binary: 'crete-gui-ffmpeg', adds: 'Both of the above.' }
@@ -115,6 +115,10 @@ export const limits = [
 	{
 		head: 'Disc audio and SACD have no external oracle.',
 		body: 'TrueHD / DTS-HD MA / AC-3 are gated against crête’s own recorded values and against the LPCM carrier of the same master — nothing outside crête, and DST sits in the same position. The SACD comparison that would settle it, crête on the ISO against crête on the `.dsf` extracted from the same disc, is written but is not running in CI.'
+	},
+	{
+		head: 'A DVD-Audio title set measures as its first mix.',
+		body: 'One title set can carry a 5.1 mix, a stereo mix and more, with boundaries that ignore the file fragments. crête measures the first group, warns and exits 2 rather than metering through the change. The disc’s track tables are read exactly, but there is no per-track DVD-Audio measurement yet.'
 	},
 	{
 		head: 'DST decoding runs at about 2× realtime.',
