@@ -102,7 +102,8 @@ is in data modules so a page template never has to change to add a row:
   `packageRepos`, `installCmds`), from the Crete repo's `packaging/obs/` and
   README install section. The repository list is the one actually published
   under `download.opensuse.org/repositories/home:/abksh:/crete/` — check it
-  there before adding or dropping a distribution.
+  there before adding or dropping a distribution. `brew` is the Homebrew tap,
+  from its own repo, `codeberg.org/abksh/homebrew-crete` (`Formula/*.rb`).
 
 ## The screenshots
 
