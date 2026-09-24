@@ -87,9 +87,13 @@
 				<p class="measure">
 					crête loads a file before decoding it. At the default DSD output rate a monolithic
 					60-minute DSD64 album decodes to about 2.6 GB of float64; at 352.8 kHz that is 8× more. Cue
-					slicing adds one slice plus roughly twice its size as working set. On constrained hosts,
-					cap the worker count with <code>-j</code>. The SACD reader is the one exception: a disc
-					image is far too large to hold, so it seeks.
+					slicing adds one slice plus roughly twice its size as working set. Since 0.19.0 crête
+					plans for this itself: the default worker count is fitted to free memory, and each unit is
+					costed by its shape — a cue sheet as its whole monolith, a DVD title set as all its
+					fragments. The SACD reader is the one exception to holding a whole file: a disc image is
+					far too large to hold, so it seeks, and an area is costed as its largest track.
+					<code>--memory-limit</code> overrides the budget and <code>-j</code> still pins the
+					count.
 				</p>
 			</div>
 		</div>

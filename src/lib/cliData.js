@@ -151,16 +151,23 @@ export const flagGroups = [
 			{
 				flag: '-j, --jobs',
 				values: 'N',
-				fallback: 'one per core',
+				fallback: 'fitted to memory and cores',
 				effect: 'none',
-				note: 'Caps the worker count. Results are order-preserving and bit-identical to a sequential run, so `-j` buys time and nothing else; `-j 1` forces strictly sequential. Workers are per **unit of work**, and the cap is the lower of `N` and the number of units — see below.'
+				note: 'Pins the worker count. Results are order-preserving and bit-identical to a sequential run, so `-j` buys time and nothing else; `-j 1` forces strictly sequential. An explicit `N` is **obeyed exactly** — crête warns if it does not expect `N` to fit in memory and proceeds, because silently overriding the flag would make a run unreproducible. Workers are per **unit of work**, and the pool is the lower of `N` and the number of units — see below.'
+			},
+			{
+				flag: '--memory-limit',
+				values: 'SIZE | N%',
+				fallback: 'detected',
+				effect: 'none',
+				note: 'The memory crête may plan for when it sizes the worker pool — a size such as `8G` or `512M`, or a share of this machine’s RAM such as `40%`. The detected default is the host’s free memory, honouring a **container / cgroup limit** where one is in force rather than the physical machine underneath. Added in 0.19.0; affects scheduling only, and the JSON tracks array is byte-identical across limits.'
 			},
 			{
 				flag: '-v, --version',
 				values: null,
 				fallback: '—',
 				effect: 'none',
-				note: 'Prints the build’s tiers, the DSD engine and licence, the three DR axes as resolved, and the full decimation chain — taps and group delay — for DSD64 through 512 at the current settings. A version string alone would not say which algorithm produced a number.'
+				note: 'Prints the build’s tiers, the DSD engine and licence, the three DR axes as resolved, the full decimation chain — taps and group delay — for DSD64 through 512 at the current settings, and since 0.19.0 a `Host:` line with the CPUs and memory the machine reported. A version string alone would not say which algorithm produced a number.'
 			},
 			{
 				flag: '-h, --help',
@@ -269,7 +276,8 @@ export const recipes = [
 		lines: [
 			['crete /path/to/album/', 'defaults: reference, quadratic, LFE excluded'],
 			['crete -f detail track.flac', 'per-channel, with the standard tags'],
-			['crete -q -f json -o album.json /path/to/album/', 'CI shape: results to the file, errors to stderr']
+			['crete -q -f json -o album.json /path/to/album/', 'CI shape: results to the file, errors to stderr'],
+			['crete --memory-limit 40% /path/to/album/', 'on a shared machine: plan for a share of it']
 		]
 	},
 	{
@@ -284,7 +292,7 @@ export const recipes = [
 		title: 'DSD',
 		lines: [
 			['crete /path/to/dsd/', 'multistage → 44.1 kHz, the parity path'],
-			['crete --dsd-out-rate 352800 -j 2 /path/to/dsd/', 'analysis rate; cap workers for memory'],
+			['crete --dsd-out-rate 352800 /path/to/dsd/', 'analysis rate; workers fitted to memory'],
 			['crete --version', 'taps and group delay for every chain']
 		]
 	},

@@ -193,14 +193,23 @@
 						</p>
 					</div>
 					<div>
-						<h3>Why you would cap it</h3>
+						<h3>Why the default is not one per core</h3>
 						<p class="measure">
 							crête loads a file before decoding it, and each in-flight file holds its full decoded
 							float64 buffer. A monolithic 60-minute DSD64 album is about 2.6 GB at the default
-							output rate and eight times that at 352.8 kHz. On a constrained host
-							<code>-j 2</code> is the fix. It is a memory control, not a correctness one:
-							<code>-j</code> is verified bit-identical to a sequential run on FLAC, DSD and cue
-							albums.
+							output rate and eight times that at 352.8 kHz. Up to 0.18.1 the default was one
+							worker per core, so a 16 GB box measuring DSD512 asked for 22 GB and was killed by
+							the OS — with empty stderr, which reads as a crash. Since 0.19.0 the default pool is
+							fitted to free memory as well as cores, estimated per item from its header, and says
+							so when memory decides:
+						</p>
+						<pre class="term">{`Note: using 3 of 12 cores -- each worker needs about 3.7 GB
+and 12 GB is available. Override with --jobs or --memory-limit.`}</pre>
+						<p class="measure">
+							It is a memory control, not a correctness one: the JSON tracks array is
+							byte-identical across <code>--jobs</code> and <code>--memory-limit</code> settings,
+							and <code>-j</code> is verified bit-identical to a sequential run on FLAC, DSD and cue
+							albums. The Linux and Windows detection paths have not yet been run.
 						</p>
 					</div>
 				</div>

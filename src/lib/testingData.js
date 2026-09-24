@@ -53,7 +53,7 @@ export const oracles = [
 	{
 		rank: 'Tier 3 · analytic',
 		name: 'Synthetic self-checks',
-		text: 'Signals whose answer is known on paper, needing no corpus and no harness. `check_fix12.sh` asserts that equal-peak / half-RMS channels differ by exactly 6.02 dB, and that raw track values 7.6/7.6/7.1 give album DR7. It passes on the fixed build and fails on the broken one. This tier is what catches the input no corpus holds: a synthetic 5.1 whose LFE is its loudest channel exposed the joint true-peak defect that every real album hides, and the DST decoder’s frame-consumption assertion caught a decoder that satisfied every other plausibility check available.'
+		text: 'Signals whose answer is known on paper, needing no corpus and no harness. `check_fix12.sh` asserts that equal-peak / half-RMS channels differ by exactly 6.02 dB, and that raw track values 7.6/7.6/7.1 give album DR7. It passes on the fixed build and fails on the broken one. `check_lfe_peak.sh`, added in 0.19.0, holds a 5.1 with every channel at −20 dBFS and the LFE at −3 to the true-peak bound, and asserts its own premise — the joint sample peak must move ~17 dB between LFE settings, or the fixture has stopped testing anything. This tier is what catches the input no corpus holds: that synthetic exposed the joint true-peak defect that every real album hides, and the DST decoder’s frame-consumption assertion caught a decoder that satisfied every other plausibility check available.'
 	},
 	{
 		rank: 'Tier 4 · controls',
@@ -185,7 +185,7 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.18.1. */
+/** Everything currently open, with the number attached. Complete as of 0.19.0. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
@@ -252,6 +252,12 @@ export const openItems = [
 		measure:
 			'FFmpeg reports an Auro carrier as plain DTS-HD MA, so the profile field cannot see it. On the one disc measured the height channels were in the carrier’s low bits — real enough to find, at 803,853 non-zero LFE samples within ±24 against the DTS:X carrier’s exact zero — but reading that is inference, not a bitstream field. If it is ever built it belongs in the confidence-scored forensics namespace, never in the metrics.',
 		status: 'Not attempted'
+	},
+	{
+		what: 'Memory detection has only run on macOS',
+		measure:
+			'0.19.0 fits the worker pool to free memory, honouring a container limit — and the Linux and Windows paths behind that, `/proc/meminfo`, the cgroup v1 and v2 memory and CPU limits, CPU affinity and `GlobalMemoryStatusEx`, are written from the documented interfaces and **have never been run**. The cgroup read most needs a real test and is also the one with the most value, since it is the case the old one-per-core default got wrong. There is no admission control either: the pool is sized once, up front, and a worker heavier than its estimate is not throttled mid-run. The next weekly on the Linux agents is the first test.',
+		status: 'Open, unverified'
 	},
 	{
 		what: 'The >4 GB allocation is untested',

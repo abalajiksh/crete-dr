@@ -34,6 +34,20 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.19.0',
+		date: '2026-09-24',
+		impact: ['identical', 'additive'],
+		title: 'The worker pool fits the machine’s memory, not just its cores',
+		body: [
+			'A minor bump although **no measurement moves**, because what an operator sees does: `--memory-limit` is a new flag, and the *default* worker count now depends on free memory as well as core count, so the same command can schedule differently on the same machine. “Changes no numbers” is not “changes nothing”, and `crete --version` goes into every harness run manifest.',
+			'The failure it closes had been seen three times — twice in the weekly harness on dsd512, and once from the field: memory climbs, the OS kills the process, and an OOM kill exits with **empty stderr**, so it reads as a crash rather than as “you asked for too much”. The default had been one worker per logical CPU, each holding a whole decoded track in float64; on a 16 GB box a DSD512 album needs about 3.7 GB per worker, so the default asked for 22 GB. The fix had lived in the harness, which does nothing for anyone who just runs the binary.',
+			'**The model is measured, not a rule of thumb.** Peak memory for one worker fits `file_bytes + K × (channels × rate × seconds × 8)`, with K at 2.21, 2.25 and 2.50 on a 6-channel 48 kHz WAV and 4- and 2-channel 192 kHz FLACs; the estimate lands +10%, +11% and −0.1% against measured peaks. A multiple of file size is not usable — file-to-peak ratios on those same three files span 6.91× to 13.42×, and on lossy input it is an order of magnitude out, a 7 MB AC-3 clip decoding to ~600 MB — so crête reads the shape from a 64 KB header peek or the container probe instead. With no `--stream` it plans for the heaviest stream, because FFmpeg’s unaided pick is not stable across remuxes. A container or cgroup limit beats physical RAM: inside a 2 GB container crête used to size itself for the machine underneath and be killed by the cgroup.',
+			'**The larger win was a bug the model exposed.** FFmpeg estimates came out 25–35% low because the decoded channel vectors had no reserve and grew geometrically, the old buffer alive beside the new one. Reserving from the declared duration cut peak memory on 120 s clips from 903 to 608 MB on AC-3 5.1, 1456 to 792 MB on TrueHD 7.1 and 2003 to 1208 MB on DTS-HD MA 5.1 96 kHz — a third to a half less on every FFmpeg decode, and a pure allocation change: same values, same order.',
+			'**`--jobs N` still wins**, obeyed exactly with a warning if it is not expected to fit, because silently overriding an explicit flag would make a run unreproducible. `--memory-limit` takes `8G`, `512M` or `40%`; `--version` prints what the host reported. The GUI takes the automatic answer. Measurement unchanged: the whole JSON tracks array byte-compared against 0.18.1 on **11 files, 0 differing**, across the zero-dependency and FFmpeg tiers, and identical across job counts and memory limits with album order kept.',
+			'Also shipped: `check_lfe_peak.sh`, a zero-dependency synthetic that finally gates the 0.15.0 joint true-peak LFE guard, which had no regression coverage and could get none from the corpus. It **fails on a 0.14.0 build by exactly the recorded 17.01 dB**. **Not verified: the Linux and Windows resource-detection paths** — including the cgroup read — are written from the documented interfaces, compiled only on macOS, and have never been run. The next weekly is their first test.'
+		]
+	},
+	{
 		version: '0.18.1',
 		date: '2026-09-23',
 		impact: ['identical', 'additive'],

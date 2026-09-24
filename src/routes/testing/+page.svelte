@@ -398,6 +398,14 @@
 				The lesson the harness took is the one its Tier 3 oracle exists for. A corpus of real albums
 				proves what happens on real albums; it cannot prove what happens on the input nobody has.
 			</p>
+			<p class="note rules">
+				From 0.15.0 to 0.18.1 the fix itself had no regression coverage — the measurement above was
+				taken once, by hand. Since 0.19.0 <code>check_lfe_peak.sh</code> gates it on every build, and
+				it was checked against a 0.14.0 build before it was trusted: the default setting fails there
+				with a <strong>17.01 dB</strong> gap, exactly the figure recorded when the fix landed, while
+				<code>--dr-lfe include</code> passes — because include <em>is</em> the old unconditional
+				behaviour, which re-confirms that every pre-0.15.0 number is still reachable through it.
+			</p>
 		</article>
 
 		<article class="case">

@@ -133,6 +133,10 @@ export const limits = [
 		body: 'The SACD, cue and stream-picker bands are verified by construction and headlessly, never visually. Narrow window widths are the case to check.'
 	},
 	{
+		head: 'Memory-aware scheduling has only run on macOS.',
+		body: 'Since 0.19.0 the default worker count is fitted to free memory and any container limit. The Linux and Windows detection paths are written from the documented interfaces and have never been run; the next weekly is their first test. No measurement depends on them.'
+	},
+	{
 		head: 'The >4 GB path is exercised; a >4 GB allocation is not.',
 		body: 'RF64 / BW64 / Wave64 64-bit sizes are honoured and verified, but crête loads a whole file before decoding and no test host is large enough yet.'
 	}
