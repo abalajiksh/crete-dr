@@ -325,7 +325,7 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 			</div>
 			<div class="rows">
 				{#each limits as l (l.head)}
-					<div><strong>{l.head}</strong> <span class="note">{l.body}</span></div>
+					<div><strong>{l.head}</strong> <span class="note"><Inline text={l.body} /></span></div>
 				{/each}
 			</div>
 		</div>

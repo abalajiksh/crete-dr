@@ -180,7 +180,7 @@ export const reach = [
 	{
 		head: 'A damaged file is named, not silently scored',
 		state: 'shipped',
-		body: 'Since 0.17.0 crête verifies FLAC frame CRC-8 and CRC-16, checks every declared length against what actually decoded, and rejects a sample peak above 0 dBFS on integer PCM as arithmetically impossible. The file is still measured — crête is a meter, not a repair tool — but every affected number is flagged, listed in JSON under a **`warnings`** array that is always present, and reflected in **exit code 2**. Before this, a FLAC with one bad sector took an album from DR13 to DR9 at a sample peak of +48.16 dBFS and exited 0.'
+		body: 'Since 0.17.0 crête verifies FLAC frame CRC-8 and CRC-16, checks every declared length against what actually decoded, and rejects a sample peak above 0 dBFS on integer PCM as arithmetically impossible. The file is still measured — crête is a meter, not a repair tool — but every affected number is flagged, listed in JSON under a `warnings` array that is always present, and reflected in **exit code 2**. Before this, a FLAC with one bad sector took an album from DR13 to DR9 at a sample peak of +48.16 dBFS and exited 0.'
 	},
 	{
 		head: 'Disc audio measured as authored',

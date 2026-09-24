@@ -635,7 +635,7 @@ s06_dtshd_ma_2.0_96k.mkv      DCA     EXACT  0.000e+00`}</pre>
 				<tbody>
 					{#each openItems as l (l.what)}
 						<tr>
-							<td><strong>{l.what}</strong></td>
+							<td><strong><Inline text={l.what} /></strong></td>
 							<td><Inline text={l.measure} /></td>
 							<td class="status">{l.status}</td>
 						</tr>
