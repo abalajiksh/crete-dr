@@ -188,9 +188,10 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 					selection.
 				</p>
 				<p class="measure">
-					An album's files are decoded and analysed across a thread pool sized to the host's cores,
-					order-preserving and verified bit-identical to a sequential run — around 5–6× faster on a
-					typical album, with no number moved. Log writing is opt-in; by default results stay in the
+					An album's files are decoded and analysed across a thread pool fitted to the host's free
+					memory as well as its cores — since 0.19.0 the same plan the CLI makes, with a note in the
+					log when memory is what limits it — order-preserving and verified bit-identical to a
+					sequential run: around 5–6× faster on a typical album, with no number moved. Log writing is opt-in; by default results stay in the
 					window.
 				</p>
 			</div>
@@ -245,9 +246,9 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 		<h2>Three CLI tiers, one GUI. The default has nothing to install.</h2>
 		<p class="intro">
 			A single translation unit, no external libraries, no build step beyond <code>make</code>.
-			Optional tiers layer on top and never enter the default path. On Linux the FFmpeg tiers are
-			also packaged, as <code>crete</code> and <code>crete-gui</code>, for openSUSE, Fedora, Debian,
-			Ubuntu and Arch.
+			Optional tiers layer on top and never enter the default path. The FFmpeg tiers are also
+			packaged, as <code>crete</code> and <code>crete-gui</code>: for openSUSE, Fedora, Debian,
+			Ubuntu and Arch, and for macOS through a Homebrew tap.
 		</p>
 		<div class="cols-tight">
 			<div>
@@ -257,7 +258,7 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 ./crete /path/to/album/`}</pre>
 				<div class="btnrow">
 					<a class="btn btn-primary" href="https://codeberg.org/abksh/Crete">Repository on Codeberg</a>
-					<a class="btn btn-secondary" href="/formats/#packages">Linux packages</a>
+					<a class="btn btn-secondary" href="/formats/#packages">Packages</a>
 					<a class="btn btn-secondary" href="/formats/">Full build matrix</a>
 				</div>
 			</div>

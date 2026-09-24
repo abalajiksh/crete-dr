@@ -34,6 +34,17 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.19.3',
+		date: '2026-09-24',
+		impact: ['identical'],
+		title: 'The FFmpeg GUI links the compact FFmpeg, not the host’s',
+		body: [
+			'`make gui-ffmpeg` put SDL2’s pkg-config flags ahead of the compact FFmpeg’s. `pkg-config sdl2` emits the package manager’s shared include and library paths — `/opt/homebrew/include` and `/opt/homebrew/lib` on a Mac — and those also hold the host’s FFmpeg. So the GUI **compiled against Homebrew’s FFmpeg 9 headers and linked its dylibs**, which are `--enable-gpl`, while reporting the compact build; `otool -L` showed `libavformat.63.dylib`. The compact FFmpeg’s flags now come first, and the rebuilt GUI links no `libav*` or `libsw*` dylib.',
+			'Scope: `gui-ffmpeg` and `debug-gui-ffmpeg` built from source on a host with an FFmpeg development package installed. The CLI tiers pass no SDL2 flags and were never affected, and neither were the 0.19.2 Linux packages, whose build chroot has no host FFmpeg. The measurement code is unchanged. Whether any number differed when an affected GUI decoded through FFmpeg 9 was not measured — such a build was not running the pinned decoder set, and 0.19.3 is the fix, not a flag.',
+			'Found while writing the **Homebrew formulae**, which ship this release: a tap, `abksh/crete`, with `crete` and `crete-gui` built from the release tag, the same two builds as the Linux packages. Both formula tests now fail if the binary links any `libav*` dylib, because Homebrew’s own `ffmpeg` is `--enable-gpl` and linking it would make crête GPL.'
+		]
+	},
+	{
 		version: '0.19.2',
 		date: '2026-09-24',
 		impact: ['identical', 'additive'],

@@ -149,7 +149,7 @@ export const buildCmds = [
 
 /** The Linux packages, as the OBS recipes in the Crete repo's packaging/obs/
     build them, and the targets the project publishes — checked against
-    download.opensuse.org, where every target listed carries 0.19.2. */
+    download.opensuse.org, where every target listed carries 0.19.3. */
 export const obs = {
 	project: 'home:abksh:crete',
 	projectUrl: 'https://build.opensuse.org/package/show/home:abksh:crete/crete',
@@ -217,6 +217,18 @@ export const installCmds = [
 	}
 ];
 
+/** The Homebrew tap, from its own repository (codeberg.org/abksh/homebrew-crete)
+    and the Crete README's install section. */
+export const brew = {
+	tap: 'abksh/crete',
+	tapUrl: 'https://codeberg.org/abksh/homebrew-crete',
+	cmds: [
+		['brew tap abksh/crete https://codeberg.org/abksh/homebrew-crete', null],
+		['brew install abksh/crete/crete', 'command-line meter'],
+		['brew install abksh/crete/crete-gui', 'graphical front-end']
+	]
+};
+
 /** Where crête builds, and how far each target is proven. */
 export const platforms = [
 	{
@@ -234,7 +246,7 @@ export const platforms = [
 	{
 		target: 'macOS',
 		state: 'builds',
-		note: 'Development host. One ULP apart from Linux on `log10`, so its JSON is not equality-comparable.'
+		note: 'Development host, and a Homebrew tap since 0.19.3. One ULP apart from Linux on `log10`, so its JSON is not equality-comparable.'
 	},
 	{
 		target: 'Windows x86-64',

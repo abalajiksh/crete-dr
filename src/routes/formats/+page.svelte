@@ -13,7 +13,8 @@
 		obs,
 		packages,
 		packageRepos,
-		installCmds
+		installCmds,
+		brew
 	} from '$lib/formatsData.js';
 </script>
 
@@ -21,7 +22,7 @@
 	<title>Formats — crête</title>
 	<meta
 		name="description"
-		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DVD title sets, DSD decimation, MQA detection, the platform matrix and the Linux packages."
+		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DVD title sets, DSD decimation, MQA detection, the platform matrix, and the Linux and Homebrew packages."
 	/>
 </svelte:head>
 
@@ -838,18 +839,26 @@ reconstructed (no open MQA decoder exists).
 			There is not one POSIX-threads call in the source — only C++17 standard threading — and file
 			dialogs and directory walking are already branched per platform. The only thing that ever
 			mattered for Windows was the toolchain's threading model. Linux packages ship from the openSUSE
-			Build Service since 0.19.2, <a href="#packages">below</a>; macOS and Windows packaging, and a
-			signed release matrix across them, are <strong>scoped but not built</strong>.
+			Build Service since 0.19.2 and a Homebrew tap covers macOS since 0.19.3,
+			<a href="#packages">below</a>; Windows packaging, and a signed release matrix, are
+			<strong>scoped but not built</strong>.
 		</p>
 	</section>
 
 	<section class="section" id="packages">
-		<p class="kicker">10 — Linux packages</p>
-		<h2>The FFmpeg tiers, packaged for five distributions</h2>
+		<p class="kicker">10 — Packages</p>
+		<h2>The FFmpeg tiers, packaged for Linux and macOS</h2>
 		<p class="intro">
-			Published from the openSUSE Build Service project <code>{obs.project}</code> since 0.19.2 — one
-			source package, built offline for every target below. The one-click page generates the right
-			commands for your distribution.
+			Both channels ship the same two builds — <code>crete</code> from <code>make cli-ffmpeg</code>
+			and <code>crete-gui</code> from <code>make gui-ffmpeg</code> — with crête's own compact LGPL
+			FFmpeg linked statically.
+		</p>
+
+		<h3>Linux — the openSUSE Build Service</h3>
+		<p class="intro">
+			Published from the project <code>{obs.project}</code> since 0.19.2 — one source package, built
+			offline for every target below. The one-click page generates the right commands for your
+			distribution.
 		</p>
 		<div class="btnrow pkg-links">
 			<a class="btn btn-primary" href={obs.oneClickUrl}>One-click install</a>
@@ -908,9 +917,35 @@ reconstructed (no open MQA decoder exists).
 
 		<div class="cols-tight sub">
 			<div>
+				<h3>macOS — a Homebrew tap</h3>
+				<pre class="term">{#each brew.cmds as [cmd, note], i (cmd)}{cmd}{#if note}{' '.repeat(
+								Math.max(1, 38 - cmd.length)
+							)}<span class="comment"># {note}</span>{/if}{#if i < brew.cmds.length - 1}{'\n'}{/if}{/each}</pre>
+				<div class="btnrow spaced">
+					<a class="btn btn-secondary" href={brew.tapUrl}>Tap source</a>
+				</div>
+			</div>
+			<div>
+				<p class="measure">
+					Since 0.19.3. Formulae, not casks, compiled from the release tag on install — so nothing is
+					quarantined and Gatekeeper does not block the unsigned binaries, and an install takes a few
+					minutes, because each formula builds FFmpeg 7.1 from source. Homebrew's own
+					<code>ffmpeg</code> is <code>--enable-gpl</code>, and linking it would make crête GPL; both
+					formula tests fail if the binary links any <code>libav*</code> dylib. Install by the full
+					<code>{brew.tap}/…</code> name: that is what tells Homebrew to trust a third-party tap.
+				</p>
+				<p class="measure">
+					A Homebrew build is a macOS build, so it is one ULP apart from Linux on
+					<code>log10</code> and its output is not equality-comparable with the gated Linux agents.
+				</p>
+			</div>
+		</div>
+
+		<div class="cols-tight sub">
+			<div>
 				<h3>Built with crête's flags, not the distribution's</h3>
 				<p class="measure">
-					Every recipe — the spec for openSUSE and Fedora, the Debian set, the PKGBUILD — removes the
+					Every Linux recipe — the spec for openSUSE and Fedora, the Debian set, the PKGBUILD — removes the
 					distribution's <code>CFLAGS</code> and <code>LDFLAGS</code> from the build environment and
 					turns off LTO and debug builds. Injected optimisation flags would give each distribution a
 					different binary and void the x86_64 / aarch64 bit-identity that
@@ -929,7 +964,8 @@ reconstructed (no open MQA decoder exists).
 					<div>
 						<h3>Not the JSON build</h3>
 						<p>
-							The packaged <code>crete</code> is <code>make cli-ffmpeg</code>, which has no
+							The packaged <code>crete</code>, on Linux and in Homebrew, is
+							<code>make cli-ffmpeg</code>, which has no
 							<code>-f json</code>. For the CI shape, build <code>make cli-json-ffmpeg</code> from
 							source.
 						</p>
@@ -937,17 +973,19 @@ reconstructed (no open MQA decoder exists).
 					<div>
 						<h3>Smoke-tested, not measured</h3>
 						<p>
-							The only check inside the package build is that the binary runs and reports the
-							version it was packaged as. Bit-identity with the gated builds holds by construction
-							— the same flags — not by comparison, and no figure on this site was measured with a
+							The only check inside a Linux package build is that the binary runs and reports the
+							version it was packaged as. The Homebrew <code>crete</code> formula's test measures a
+							20 s 1 kHz sine at −6 dBFS and asserts DR0, a −6.02 dBFS sample peak and −6.01 LUFS —
+							but Homebrew runs it only on <code>brew test</code>, not on install. For the Linux packages, bit-identity with the gated builds
+							holds by construction — the same flags — not by comparison. No figure on this site was measured with a
 							packaged binary: the current census is weekly #85, on 0.18.0.
 						</p>
 					</div>
 					<div>
 						<h3>x86_64 only outside openSUSE and Fedora</h3>
 						<p>
-							Debian, Ubuntu, Arch and Fedora Rawhide are built for x86_64 alone. There is no macOS
-							or Windows package.
+							Debian, Ubuntu, Arch and Fedora Rawhide are built for x86_64 alone. There is no
+							Windows package.
 						</p>
 					</div>
 				</div>
