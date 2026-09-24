@@ -149,7 +149,7 @@ export const buildCmds = [
 
 /** The Linux packages, as the OBS recipes in the Crete repo's packaging/obs/
     build them, and the targets the project publishes — checked against
-    download.opensuse.org, where every target listed carries 0.19.3. */
+    download.opensuse.org, where every target listed carries 0.19.4. */
 export const obs = {
 	project: 'home:abksh:crete',
 	projectUrl: 'https://build.opensuse.org/package/show/home:abksh:crete/crete',
