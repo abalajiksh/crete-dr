@@ -34,6 +34,30 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.19.2',
+		date: '2026-09-24',
+		impact: ['identical', 'additive'],
+		title: 'Linux packages, from the openSUSE Build Service',
+		body: [
+			'crête is now packaged for **openSUSE, Fedora, Debian, Ubuntu and Arch**, published from the OBS project `home:abksh:crete`. Two packages: `crete` is `make cli-ffmpeg` installed as `/usr/bin/crete` — the native decoders plus the compact FFmpeg set, and no `-f json` — and `crete-gui` is `make gui-ffmpeg` as `/usr/bin/crete-gui`, with a desktop entry and its fonts. The first round built green on all 15 targets.',
+			'**Built with crête’s flags, not the distribution’s.** Every recipe removes distro `CFLAGS` and `LDFLAGS` from the environment and turns off LTO and debug builds, because injected optimisation flags would give each distribution a different binary and void the cross-architecture bit-identity `-ffp-contract=off` exists for. That holds by construction; the only check inside the package build is that the binary runs and reports the version it was packaged as. OBS builds offline, so the source tarball carries the pinned ImGui subset and the whole FFmpeg n7.1 tree, and `scripts/make_obs_source.sh` produces it deterministically — the same ref gives the same sha256.',
+			'Three fixes at the source rather than in the packaging. The GUI looked for its fonts only beside the binary, which for an installed `/usr/bin/crete-gui` is `/usr/bin/fonts/`, and fell back to ImGui’s bitmap font **silently**; `CRETE_DATADIR` adds an install data directory searched after the binary’s own, so dev and portable trees behave as before. The compact-FFmpeg script cloned FFmpeg unless the source had a `.git`, so a tarball tree could not build without network; it now tests for `configure`, and because that edits the script, every cached compact FFmpeg rebuilds once. And the FFmpeg lookup used `PKG_CONFIG_PATH`, which only *prepends* to pkg-config’s search: with no compact prefix built yet it found the **host’s** FFmpeg — Homebrew’s 9.0.1, an `--enable-gpl` build — skipped the compact build and linked against the wrong libraries. `PKG_CONFIG_LIBDIR` replaces the search, so only the prefix can answer.',
+			'Measurement unchanged, and the reason is the diff: the only source file that changed is the GUI’s font lookup, and with the compact prefix present the resolved FFmpeg cflags and static libs were checked byte-identical under the new lookup. Archivo now ships with its OFL text, which it had not.'
+		]
+	},
+	{
+		version: '0.19.1',
+		date: '2026-09-24',
+		impact: ['moves'],
+		title: 'A cue sheet naming several files is sliced from the right one',
+		body: [
+			'**A multi-FILE cue sheet was sliced entirely from its last file.** The parser kept one referenced file per sheet and overwrote it on every `FILE` line, so a sheet naming several — one per vinyl side, per disc, or per track — was applied to the last. `INDEX` times restart at `00:00:00` in each file, so every track was cut from the wrong audio, and it failed silently. On Bronski Beat’s *The Age Of Consent*, a vinyl rip with 4 files and 10 tracks: all ten `INDEX` times were sliced from side B02, so tracks 01, 04, 06 and 09 all began at 0:00 of that one file and reported identical peaks; 03, 05 and 08 were dropped as an empty cue range; the other three sides, unclaimed by the cue, were measured whole as standalone files — and the run printed 10 rows, averaged an album DR12 over them, and **exited 0**.',
+			'Each track now records the file its `INDEX 01` lies in — re-read at `INDEX 01`, not only at `TRACK`, so a gaps-appended sheet that puts `FILE` between a track’s `INDEX 00` and `INDEX 01` still attributes the start correctly — and each run of consecutive tracks in one file is decoded once and sliced against its own timeline. The slicer itself is unchanged. **A cue track whose range is empty is now dropped with a named warning and the run exits 2**: an album missing a track is not a complete measurement.',
+			'**What moves, and why no flag restores it.** Single-FILE cues and every non-cue input measure byte-identically to 0.19.0 — on Enya’s *Watermark*, stdout and stderr both. What changes for a multi-FILE cue is which audio each track is cut from, the track names and order, and the exit status; the 0.19.0 numbers for such a sheet were measured from the wrong audio, so there is nothing to reproduce and they should be discarded rather than compared. On Boney M’s *10.000 Lightyears*, one file per track, every measured value is unchanged, the 13 empty-range warnings are gone and the tracks list in cue order — and the old `14 - B8. Barbarella Fortuneteller` name behind the Weekly #46 pairing rotation turns out to have been this bug, not a renamed file.',
+			'Verified on Bronski Beat: 10 tracks, no warnings, exit 0; each side’s track durations sum exactly to that side (13:03, 9:12, 12:02) and each side’s loudest track reproduces that side’s whole-file peak. ASan and UBSan at `-O0` report nothing, with output byte-identical to the `-O2` build. `check_cue_multifile.sh` is a new zero-dependency synthetic that **passes, and fails on 0.19.0**. Also carried: the compact-FFmpeg build stamp was written with an empty script hash, so every FFmpeg-tier build rebuilt FFmpeg, about 10 minutes each time.'
+		]
+	},
+	{
 		version: '0.19.0',
 		date: '2026-09-24',
 		impact: ['identical', 'additive'],

@@ -98,6 +98,11 @@ is in data modules so a page template never has to change to add a row:
 * `src/lib/homeData.js`, `testingData.js`, `formatsData.js` — the metric table,
   DR bands, build matrix, suites, oracles, limitations, decoder tables and
   platform matrix.
+* `formatsData.js` also holds the Linux package tables (`obs`, `packages`,
+  `packageRepos`, `installCmds`), from the Crete repo's `packaging/obs/` and
+  README install section. The repository list is the one actually published
+  under `download.opensuse.org/repositories/home:/abksh:/crete/` — check it
+  there before adding or dropping a distribution.
 
 ## The screenshots
 
