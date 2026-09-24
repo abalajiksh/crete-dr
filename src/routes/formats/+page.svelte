@@ -851,7 +851,8 @@ reconstructed (no open MQA decoder exists).
 		<p class="intro">
 			Both channels ship the same two builds — <code>crete</code> from <code>make cli-ffmpeg</code>
 			and <code>crete-gui</code> from <code>make gui-ffmpeg</code> — with crête's own compact LGPL
-			FFmpeg linked statically.
+			FFmpeg linked statically. Since 0.19.4 a pushed release tag publishes both: OBS first, and the
+			tap only once every OBS repository has built and published that version.
 		</p>
 
 		<h3>Linux — the openSUSE Build Service</h3>
@@ -935,6 +936,11 @@ reconstructed (no open MQA decoder exists).
 					<code>{brew.tap}/…</code> name: that is what tells Homebrew to trust a third-party tap.
 				</p>
 				<p class="measure">
+					There is no macOS build agent. The tap is bumped once the 15 Linux builds of the same source
+					have published — evidence that the tag builds, not that the formula builds on a Mac, so a
+					failure there would first surface on a user's <code>brew install</code>.
+				</p>
+				<p class="measure">
 					A Homebrew build is a macOS build, so it is one ULP apart from Linux on
 					<code>log10</code> and its output is not equality-comparable with the gated Linux agents.
 				</p>
@@ -979,6 +985,14 @@ reconstructed (no open MQA decoder exists).
 							but Homebrew runs it only on <code>brew test</code>, not on install. For the Linux packages, bit-identity with the gated builds
 							holds by construction — the same flags — not by comparison. No figure on this site was measured with a
 							packaged binary: the current census is weekly #85, on 0.18.0.
+						</p>
+					</div>
+					<div>
+						<h3>Not built on a Mac before release</h3>
+						<p>
+							The release job has no macOS agent. A Homebrew formula is published on the strength
+							of the Linux builds, and a macOS build failure would first surface on a user's
+							<code>brew install</code>.
 						</p>
 					</div>
 					<div>

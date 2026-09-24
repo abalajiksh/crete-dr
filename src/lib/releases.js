@@ -34,6 +34,17 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.19.4',
+		date: '2026-09-24',
+		impact: ['identical'],
+		title: 'Releases are published by Jenkins on tag push',
+		body: [
+			'**No measurement or build changes**: between the 0.19.3 and 0.19.4 tags the Makefile changes only its `VERSION`, and everything else is packaging, scripts and the README. What changes is how a release reaches people. `packaging/Jenkinsfile.release` runs on a pushed `vX.Y.Z` tag, checks it against the Makefile’s `VERSION`, assembles the OBS upload from the tag — keeping the changelog history already published there rather than replacing it — and smoke-builds the FFmpeg CLI tier from that tarball, asserting the version, the compact FFmpeg version and that no shared `libav*` or `libsw*` library is linked. It then commits to `home:abksh:crete`, **waits until every repository has built and published that version** — its binaries carrying the new version, not merely a “succeeded”, which a repository also reports for the previous revision — and only then points the Homebrew formulae at the tag and pushes the tap with a deploy key.',
+			'Every step is idempotent: the tarball is deterministic, so a re-run for a tag that is already out finds OBS’s copy byte-identical and skips the commit. The tap bump downloads the Codeberg archive twice and refuses if the bytes differ, and follows a change to the pinned FFmpeg version or ImGui commit, so a dependency bump cannot ship a formula still building the old one.',
+			'**What it does not prove: the macOS build.** There is no macOS agent, so the tap is bumped on the evidence of the 15 Linux builds of the identical source — evidence that the tag builds, not that the formula builds on a Mac. A failure there would first surface on a user’s `brew install`. And the job was rehearsed step by step before it ran, but not as Jenkins: the first real run stopped in Preflight, because `osc` on an agent with no login prompts for a username and aborts, which the rehearsal on a machine with a login could not see. That was fixed after the tag. 0.19.4 is published on all 15 OBS repositories and in the tap.'
+		]
+	},
+	{
 		version: '0.19.3',
 		date: '2026-09-24',
 		impact: ['identical'],
