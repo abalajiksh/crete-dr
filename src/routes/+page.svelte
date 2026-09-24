@@ -245,7 +245,9 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 		<h2>Three CLI tiers, one GUI. The default has nothing to install.</h2>
 		<p class="intro">
 			A single translation unit, no external libraries, no build step beyond <code>make</code>.
-			Optional tiers layer on top and never enter the default path.
+			Optional tiers layer on top and never enter the default path. On Linux the FFmpeg tiers are
+			also packaged, as <code>crete</code> and <code>crete-gui</code>, for openSUSE, Fedora, Debian,
+			Ubuntu and Arch.
 		</p>
 		<div class="cols-tight">
 			<div>
@@ -255,6 +257,7 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 ./crete /path/to/album/`}</pre>
 				<div class="btnrow">
 					<a class="btn btn-primary" href="https://codeberg.org/abksh/Crete">Repository on Codeberg</a>
+					<a class="btn btn-secondary" href="/formats/#packages">Linux packages</a>
 					<a class="btn btn-secondary" href="/formats/">Full build matrix</a>
 				</div>
 			</div>
@@ -322,7 +325,7 @@ make                  `}<span class="comment"># zero-dep CLI</span>{`
 			</div>
 			<div class="rows">
 				{#each limits as l (l.head)}
-					<div><strong>{l.head}</strong> <span class="note">{l.body}</span></div>
+					<div><strong>{l.head}</strong> <span class="note"><Inline text={l.body} /></span></div>
 				{/each}
 			</div>
 		</div>

@@ -36,7 +36,11 @@ export const native = [
 		ext: ['.iso'],
 		note: 'Scarlet Book. Both areas read from the disc TOC, DSD and DST — and dispatched by content, not by extension.'
 	},
-	{ name: 'Cue sheet', ext: ['.cue'], note: 'Splits a monolithic file into per-track results.' }
+	{
+		name: 'Cue sheet',
+		ext: ['.cue'],
+		note: 'Splits a monolithic file — or several, one per side or disc — into per-track results.'
+	}
 ];
 
 /** What each container lets crête verify about itself, and what it does not.
@@ -141,6 +145,76 @@ export const buildCmds = [
 	{ cmd: 'make dvda-info', note: 'DVD-Audio title-set tables' },
 	{ cmd: 'make debug', note: 'asan + ubsan' },
 	{ cmd: 'make STATIC=1', note: 'fully static link' }
+];
+
+/** The Linux packages, as the OBS recipes in the Crete repo's packaging/obs/
+    build them, and the targets the project publishes — checked against
+    download.opensuse.org, where every target listed carries 0.19.2. */
+export const obs = {
+	project: 'home:abksh:crete',
+	projectUrl: 'https://build.opensuse.org/package/show/home:abksh:crete/crete',
+	oneClickUrl: 'https://software.opensuse.org/download.html?project=home:abksh:crete&package=crete'
+};
+
+export const packages = [
+	{
+		name: 'crete',
+		installs: '`/usr/bin/crete`',
+		from: '`make cli-ffmpeg` — the native decoders plus the compact FFmpeg set. No `-f json`.'
+	},
+	{
+		name: 'crete-gui',
+		installs: '`/usr/bin/crete-gui`, a desktop entry, fonts in `/usr/share/crete`',
+		from: '`make gui-ffmpeg`. File dialogs use zenity or kdialog, whichever is installed.'
+	}
+];
+
+export const packageRepos = [
+	{
+		distro: 'openSUSE Tumbleweed',
+		repos: ['openSUSE_Tumbleweed', 'openSUSE_Factory_ARM'],
+		arch: 'x86_64 · aarch64 (Factory_ARM)'
+	},
+	{ distro: 'openSUSE Leap 16.0', repos: ['16.0'], arch: 'x86_64 · aarch64' },
+	{
+		distro: 'Fedora 43, 44, Rawhide',
+		repos: ['Fedora_43', 'Fedora_44', 'Fedora_Rawhide'],
+		arch: 'x86_64 · aarch64 (Rawhide x86_64 only)'
+	},
+	{ distro: 'Debian 12, 13', repos: ['Debian_12', 'Debian_13'], arch: 'x86_64' },
+	{
+		distro: 'Ubuntu 22.04, 24.04, 26.04',
+		repos: ['xUbuntu_22.04', 'xUbuntu_24.04', 'xUbuntu_26.04'],
+		arch: 'x86_64'
+	},
+	{ distro: 'Arch Linux', repos: ['Arch'], arch: 'x86_64' }
+];
+
+/** The README's install commands, verbatim. The repository name in each URL
+    is one from the table above. */
+export const installCmds = [
+	{
+		title: 'openSUSE',
+		lines: [
+			'sudo zypper addrepo https://download.opensuse.org/repositories/home:abksh:crete/openSUSE_Tumbleweed/home:abksh:crete.repo',
+			'sudo zypper install crete crete-gui'
+		]
+	},
+	{
+		title: 'Fedora',
+		lines: [
+			'sudo dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/home:abksh:crete/Fedora_44/home:abksh:crete.repo',
+			'sudo dnf install crete crete-gui'
+		]
+	},
+	{
+		title: 'Debian / Ubuntu',
+		lines: [
+			"echo 'deb https://download.opensuse.org/repositories/home:/abksh:/crete/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/crete.list",
+			'curl -fsSL https://download.opensuse.org/repositories/home:abksh:crete/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/crete.gpg > /dev/null',
+			'sudo apt update && sudo apt install crete crete-gui'
+		]
+	}
 ];
 
 /** Where crête builds, and how far each target is proven. */
