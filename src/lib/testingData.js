@@ -185,7 +185,7 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.19.2. */
+/** Everything currently open, with the number attached. Complete as of 0.19.5. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
@@ -252,6 +252,12 @@ export const openItems = [
 		measure:
 			'FFmpeg reports an Auro carrier as plain DTS-HD MA, so the profile field cannot see it. On the one disc measured the height channels were in the carrier’s low bits — real enough to find, at 803,853 non-zero LFE samples within ±24 against the DTS:X carrier’s exact zero — but reading that is inference, not a bitstream field. If it is ever built it belongs in the confidence-scored forensics namespace, never in the metrics.',
 		status: 'Not attempted'
+	},
+	{
+		what: 'The 0.19.5 duration guard has not yet run on Linux',
+		measure:
+			'Weekly #92 failed the DVD suite’s group-change test with `std::bad_alloc` on a Linux agent: a wrapped MPEG-PS timestamp declared 95 268 s for 12 MB of MLP, and the 0.19.0 decode reserve asked for about 40 GB per channel — which Linux refuses and macOS maps lazily, so the suite had passed on the development Mac. 0.19.5 rejects a duration the file is too small to hold. It is verified on macOS — DVD suite 12/12, seven FFmpeg carriers byte-identical with unchanged peak memory — and the Linux path is confirmed only by the next weekly. The census on this page remains weekly #85.',
+		status: 'Open, unverified'
 	},
 	{
 		what: 'Memory detection has only run on macOS',

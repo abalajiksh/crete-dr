@@ -479,7 +479,10 @@ crete --sacd-area stereo       album.iso`}</pre>
 				<p class="note spaced">
 					Dispatch is by <strong>content, not extension</strong>. <code>.iso</code> names every disc
 					image ever made, so crête checks for the SACD master TOC signature at a fixed sector and
-					quietly ignores anything else rather than trying to meter a data DVD.
+					quietly ignores anything else rather than trying to meter a data DVD. Since 0.19.5 a DVD
+					image is named as one — DVD-Audio or DVD-Video — with the instruction to mount it and
+					measure its <code>AUDIO_TS</code> or <code>VIDEO_TS</code> folder. It is identified, not
+					read: title sets are not read out of an image.
 				</p>
 				<h4 class="val-head">Validation</h4>
 				<p class="note">

@@ -34,6 +34,18 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.19.5',
+		date: '2026-09-25',
+		impact: ['identical'],
+		title: 'A container duration the file is too small to hold is no longer trusted',
+		body: [
+			'**Weekly #92 failed the DVD suite’s group-change test on a Linux agent**, with `std::bad_alloc`. Read as one stream, the two 6 MB parts of the *Rumours* group-change title set cross a 2³³ wrap in the MPEG-PS timestamps, and FFmpeg declares **95 268 s for 12 MB** of MLP. The decode reserve added in 0.19.0 trusted that and asked for about 40 GB per channel. Linux refuses such an allocation outright; macOS maps it lazily — so the suite had passed on the development Mac. The memory planner read the same duration and warned that the file needed about 341 GB.',
+			'A declared duration implying fewer than 0.01 coded bits per sample per channel is now rejected — ten times below digital silence in FLAC and far below any real codec; the wrapped title set is 0.0018. The planner then falls back to its size-based model, and the reserve is skipped. A reserve that is refused anyway now drops the hint instead of failing the file.',
+			'**No measured value changes**, verified: the fixture’s JSON is byte-identical with the warning gone, and seven FFmpeg carriers — TrueHD, AC-3, DTS-HD MA twice, the six-stream MKV, AOB and VOB — are byte-identical with **unchanged peak memory**, so the reserve still fires on real files. The DVD suite passes 12/12 locally. **The Linux path is confirmed only by the next weekly.**',
+			'Also: an `.iso` that is a DVD image is now named as one — DVD-Audio or DVD-Video, read from the image’s ISO 9660 root — with the instruction to mount it and measure its `AUDIO_TS` or `VIDEO_TS` folder, instead of the true but unhelpful “not an SACD image”. It only identifies; title sets are not read out of the image. And in the GUI, the selected track’s metadata and immersive-profile lines wrap instead of running off the detail column, which the Atmos caption did on a TrueHD rip.'
+		]
+	},
+	{
 		version: '0.19.4',
 		date: '2026-09-24',
 		impact: ['identical'],
