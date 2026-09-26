@@ -34,6 +34,19 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.20.0',
+		date: '2026-09-26',
+		impact: ['moves'],
+		title: 'Tracks under 10 s have no DR, as in MAAT',
+		body: [
+			'A track shorter than 10 seconds no longer gets a DR value. It reads `DR--` (JSON `null`) and is left out of the album DR, which is what MAAT DROffline does: its limit was measured with synthetic tracks from 3 to 45 s and is exactly 10.000 s. Everything else about such a track is still measured.',
+			'This changes album DR wherever an album holds very short clips. **Kill Bill Vol. 1** ends with three sound-effect clips, one of which read a raw DR of −100; averaged in, it took the album to DR4 where MAAT says DR10. It now reads DR10. On the rest of the reference corpus no value moved: 15,417 values compared against the previous weekly, zero changed.',
+			'`--dr-short include` gives the 0.19.5 numbers back.',
+			'This is also the first release with Windows x86_64 binaries attached to the Codeberg release (`crete.exe` and `crete-gui.exe`, no DLLs), installable with Scoop from the `abksh/scoop-crete` bucket.',
+			'**Qualified by Crete-Weekly #96** on `37327b0`: tests: 215 passed, 0 failed, 16 skipped; compared 15,439 values against the references, 77 flagged (0.50 %), 0 catastrophic; against 0.19.5, not comparable: no recorded measurements for 0.19.5.'
+		]
+	},
+	{
 		version: '0.19.5',
 		date: '2026-09-25',
 		impact: ['identical'],
