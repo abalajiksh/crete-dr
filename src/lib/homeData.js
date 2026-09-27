@@ -98,11 +98,11 @@ export const builds = [
 export const limits = [
 	{
 		head: '44.1 kHz is the parity-guaranteed DSD rate.',
-		body: '88.2 / 176.4 / 352.8 kHz output is offered for analysis, not parity — retained ultrasonic noise-shaping inflates DR by +1…+3 there. At the default rate the per-track DR comparison flags nothing on any of the 8 DSD albums and album DR matches on 7 of 8; the exception misses a `.5` boundary by 0.020 dB and is an accuracy question, not a rate one.'
+		body: '88.2 / 176.4 / 352.8 kHz output is offered for analysis, not parity — retained ultrasonic noise-shaping inflates DR by +1…+3 there. At the default rate the continuous per-track DR comparison flags nothing on any of the 8 DSD albums and album DR matches on 7 of 8; the exception misses a `.5` boundary by 0.020 dB and is an accuracy question, not a rate one.'
 	},
 	{
 		head: 'Min PSR disagrees with the reference by design.',
-		body: 'MAAT uses a 0.5 dB/s decaying peak-hold; crête implements the published AES eBrief 373 formula. Average delta 0.598 dB over 411 comparisons — the worst metric in the suite.'
+		body: 'MAAT uses a 0.5 dB/s decaying peak-hold; crête implements the published AES eBrief 373 formula. Average delta 0.576 dB over 571 comparisons in weekly #96 — the worst metric in the suite.'
 	},
 	{
 		head: 'MQA is detected, never decoded.',
@@ -133,8 +133,8 @@ export const limits = [
 		body: 'The SACD, cue and stream-picker bands are verified by construction and headlessly, never visually. Narrow window widths are the case to check.'
 	},
 	{
-		head: 'Memory-aware scheduling has only run on macOS.',
-		body: 'Since 0.19.0 the default worker count is fitted to free memory and any container limit. The Linux and Windows detection paths are written from the documented interfaces and have never been run; the next weekly is their first test. No measurement depends on them.'
+		head: 'Memory-aware scheduling has not met a container limit.',
+		body: 'Since 0.19.0 the default worker count is fitted to free memory and any container limit. The Linux detection has run on both weekly agents, neither of which has a limit, so the cgroup reads have never returned one; the Windows path has never been run. No measurement depends on them.'
 	},
 	{
 		head: 'The >4 GB path is exercised; a >4 GB allocation is not.',

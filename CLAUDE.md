@@ -64,10 +64,13 @@ machine. `bun install`, `bun run dev`, `bun run build`.
 **Every figure on this site is a real measurement from the Crete repo or the
 crete-pytest harness.** They were checked against those repos line by line when
 the site was built and re-checked at each weekly since — the current census is
-weekly `#85` (0.18.0) at `210/194/0/16` tests, `11,931` comparisons over `51`
-albums, `44` flagged, `0.598 dB` average Min PSR, `273` cross-arch fields. Its
-15 detailed reports are identical to `#77`'s below the header. `#81` and `#82`
-went unstable on corpus staging and are deliberately not the census. Where a
+weekly `#96` (0.20.0, the run that qualified the v0.20.0 tag) at `231/215/0/16`
+tests, `15,439` comparisons over `63` albums, `77` flagged, `0.576 dB` average
+Min PSR over `571`, `273` cross-arch fields. Its 16 detailed reports (the 15
+`#85` had, plus SMOKE) are identical to `#95`'s below the header. On the 15
+`#85` also had it is `12,073` comparisons over `52` albums and `44` flags.
+`#87` and `#92` went unstable on the DVD `bad_alloc` and `#81`/`#82` on corpus
+staging; none is the census. Where a
 figure belongs to a specific past experiment it stays pinned to it: `2241` DR
 comparisons and `0.0262` mean |Δ| are the #68→#69 block-set A/B, not a current
 count. If you change a number, you must have a source in one of those two repos
@@ -76,7 +79,12 @@ forward because it was already on the page.
 
 The archived weekly runs live in the Crete repo's (gitignored) `temp/` folder as
 `archiveNN.zip`; each holds `archive/test-results/<suite>_detailed.txt` with the
-per-album and global metric summaries every suite figure here comes from.
+per-album and global metric summaries every suite figure here comes from. Recent
+weeklies are also on Jenkins (`jenkins.insightsintoinfinite.com`, job
+`Crete/Crete-Weekly`, `artifact/*zip*/archive.zip`, including `allure-report.zip`,
+whose attachments carry the cross-arch field count), and Crete-Tag attaches the
+qualifying weekly's reports to each Codeberg release. Min PSR's average is the
+count-weighted mean of the reports' three-decimal suite averages.
 
 The honesty is the product. The Testing page's "Known limitations" table and the
 Formats page's caveats are deliberately unflattering. **Don't soften a caveat,
