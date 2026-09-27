@@ -229,6 +229,17 @@ export const brew = {
 	]
 };
 
+/** The Scoop bucket, from its own repository (codeberg.org/abksh/scoop-crete),
+    and the Windows zip attached to each Codeberg release since 0.20.0. */
+export const scoop = {
+	bucketUrl: 'https://codeberg.org/abksh/scoop-crete',
+	releasesUrl: 'https://codeberg.org/abksh/Crete/releases',
+	cmds: [
+		['scoop bucket add crete https://codeberg.org/abksh/scoop-crete', null],
+		['scoop install crete/crete', 'crete and crete-gui']
+	]
+};
+
 /** Where crête builds, and how far each target is proven. */
 export const platforms = [
 	{
@@ -250,8 +261,8 @@ export const platforms = [
 	},
 	{
 		target: 'Windows x86-64',
-		state: 'cross-builds clean',
-		note: 'Zero source changes, zero warnings. `STATIC=1` is not optional — without it the executable needs three runtime DLLs and the single-binary promise breaks.'
+		state: 'built & self-checked',
+		note: 'Built natively under MSYS2 on a Windows 11 agent for every release since 0.20.0, and the JSON build runs `check_fix12.sh`, `check_lfe_peak.sh` and a JSON round trip. `STATIC=1` is not optional — without it the executable needs three runtime DLLs and the single-binary promise breaks — and an import of a MinGW runtime, SDL2 or FFmpeg DLL fails the build. No weekly result on this site was measured on Windows.'
 	},
 	{
 		target: 'Windows on ARM',
@@ -261,8 +272,8 @@ export const platforms = [
 	},
 	{
 		target: 'Windows GUI',
-		state: 'untested',
+		state: 'built, unverified',
 		tone: 'bad',
-		note: 'Needs a Windows SDL2 the current toolchain does not provide. The CLI tiers are what the harness and most users need, and they are proven.'
+		note: 'Since 0.20.0 `crete-gui.exe` ships in the release zip with SDL2 linked statically, so the missing-SDL2 blocker is gone. Nothing checks it: the build job exercises only the CLI, and the repo records no run of the GUI on Windows.'
 	}
 ];

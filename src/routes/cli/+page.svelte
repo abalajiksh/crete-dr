@@ -17,7 +17,7 @@
 	<title>CLI reference — crête</title>
 	<meta
 		name="description"
-		content="Every crête command-line flag, its default, and whether it moves a number: the three DR axes, the three DSD decode axes, SACD area and stream selection, the five output formats, exit status and parallelism."
+		content="Every crête command-line flag, its default, and whether it moves a number: the four DR axes, the three DSD decode axes, SACD area and stream selection, the five output formats, exit status and parallelism."
 	/>
 </svelte:head>
 

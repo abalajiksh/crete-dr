@@ -248,7 +248,7 @@ DR9        over       -10.56 dB  03. GLBTM (Outtakes).wav
 			A single translation unit, no external libraries, no build step beyond <code>make</code>.
 			Optional tiers layer on top and never enter the default path. The FFmpeg tiers are also
 			packaged, as <code>crete</code> and <code>crete-gui</code>: for openSUSE, Fedora, Debian,
-			Ubuntu and Arch, and for macOS through a Homebrew tap.
+			Ubuntu and Arch, for macOS through a Homebrew tap, and for Windows through Scoop.
 		</p>
 		<div class="cols-tight">
 			<div>

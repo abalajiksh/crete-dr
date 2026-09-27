@@ -37,7 +37,7 @@
 		{
 			ch: '8',
 			name: '7.1',
-			order: [{ t: 'L R C ' }, { t: 'LFE', lfe: true }, { t: ' Lss Rss Lrs Rrs' }]
+			order: [{ t: 'L R C ' }, { t: 'LFE', lfe: true }, { t: ' Lrs Rrs Lss Rss' }]
 		}
 	];
 </script>
@@ -102,7 +102,8 @@
 					</li>
 					<li>
 						<strong>Album DR</strong> = the mean of the raw per-track values, rounded once. Per-track
-						values are never rounded before averaging.
+						values are never rounded before averaging. Since 0.20.0 a track under 10 s has no DR
+						and is left out of the mean, as in MAAT DROffline.
 					</li>
 				</ol>
 				<p class="note">
@@ -113,7 +114,7 @@
 				</p>
 			</div>
 			<div>
-				<h2 class="h-ab">Two A/B axes, both defaulting to the reference</h2>
+				<h2 class="h-ab">Three A/B axes, each defaulting to the reference</h2>
 				<p class="measure">
 					Both switches exist so old numbers can be re-read and new ones attributed. Neither is a
 					preference; each has a right answer and it is the default.
@@ -128,16 +129,27 @@
 						</p>
 					</div>
 					<div>
-						<h3><code>--dr-blocks reference | legacy</code></h3>
+						<h3><code>--dr-blocks reference | legacy | foobar</code></h3>
 						<p>
 							Which blocks are ranked at all. <code>reference</code> is the PMF reference
 							implementation — trailing block kept, no gate — and the default since 0.14.0.
-							<code>legacy</code> reproduces ≤ 0.13.1.
+							<code>legacy</code> reproduces ≤ 0.13.1. <code>foobar</code>, since 0.20.0, puts the
+							reference grid 244 ms in, as measured on foobar2000's DR Meter; it is experimental
+							until a full weekly decides it.
+						</p>
+					</div>
+					<div>
+						<h3><code>--dr-short exclude | include</code></h3>
+						<p>
+							Whether a track under 10 s gets a DR. <code>exclude</code> is MAAT DROffline's own
+							limit, measured at exactly 10.000 s, and the default since 0.20.0;
+							<code>include</code> reproduces ≤ 0.19.5.
 						</p>
 					</div>
 				</div>
 				<p class="note spaced">
-					In JSON, every result carries <code>dr_rms_mean</code> and <code>dr_blocks</code>, and DSD
+					In JSON, every result carries <code>dr_rms_mean</code>, <code>dr_blocks</code> and
+					<code>dr_short</code>, and DSD
 					tracks additionally carry chain, filter and output rate — recording exactly how the numbers
 					were produced. An unlabelled DSD result is not interpretable.
 				</p>

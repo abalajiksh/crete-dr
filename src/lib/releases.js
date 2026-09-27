@@ -36,12 +36,14 @@ export const releases = [
 	{
 		version: '0.20.0',
 		date: '2026-09-26',
-		impact: ['moves'],
+		impact: ['moves', 'additive'],
 		title: 'Tracks under 10 s have no DR, as in MAAT',
 		body: [
 			'A track shorter than 10 seconds no longer gets a DR value. It reads `DR--` (JSON `null`) and is left out of the album DR, which is what MAAT DROffline does: its limit was measured with synthetic tracks from 3 to 45 s and is exactly 10.000 s. Everything else about such a track is still measured.',
 			'This changes album DR wherever an album holds very short clips. **Kill Bill Vol. 1** ends with three sound-effect clips, one of which read a raw DR of −100; averaged in, it took the album to DR4 where MAAT says DR10. It now reads DR10. On the rest of the reference corpus no value moved: 15,417 values compared against the previous weekly, zero changed.',
 			'`--dr-short include` gives the 0.19.5 numbers back.',
+			'Also new, and opt-in: `--dr-blocks foobar`, the reference rules on a 3 s grid whose first full block starts **244 ms** into the track. The offset is measured, not documented: 43 purpose-cut clips through foobar2000 DR Meter 1.0.8 put the first block at 243.6–244.7 ms, the same at 48, 96 and 192 kHz. It lands within foobar’s 0.01 dB display step on 83 of 86 per-channel values, against 10 of 86 for `reference`, and against MAAT on 406 per-channel values it lowers the median |Δ| from 0.0174 to 0.0112 and the maximum from 1.64 to 0.87. But MAAT’s per-track optima disagree, so MAAT does not use a fixed 244 ms, and the one 44.1 kHz album measured got slightly worse — so it stays opt-in until a full weekly decides. `reference` and `legacy` are byte-identical before and after.',
+			'The 7.1 back pair is now labelled before the side pair — `L R C LFE Lrs Rrs Lss Rss`, the order FFmpeg hands back, FLAC mandates and foobar2000 prints — where crête had the two pairs the other way round. Labels only: both pairs carry the same +1.5 dB BS.1770 weight, and every number on the 7.1 test clip is identical. A 7.1(wide) source is still labelled and weighted as surround, because crête never reads the channel mask.',
 			'This is also the first release with Windows x86_64 binaries attached to the Codeberg release (`crete.exe` and `crete-gui.exe`, no DLLs), installable with Scoop from the `abksh/scoop-crete` bucket.',
 			'**Qualified by Crete-Weekly #96** on `37327b0`: tests: 215 passed, 0 failed, 16 skipped; compared 15,439 values against the references, 77 flagged (0.50 %), 0 catastrophic; against 0.19.5, not comparable: no recorded measurements for 0.19.5.'
 		]

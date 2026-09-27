@@ -185,7 +185,7 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.19.5. */
+/** Everything currently open, with the number attached. Complete as of 0.20.0. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
@@ -268,7 +268,7 @@ export const openItems = [
 	{
 		what: 'The packages are smoke-tested, not measured',
 		measure:
-			'Since 0.19.2 `crete` and `crete-gui` are published for openSUSE, Fedora, Debian, Ubuntu and Arch, and the only check inside each package build is that the binary runs and reports the version it was packaged as. The Homebrew `crete` formula, since 0.19.3, carries a test that measures a 20 s 1 kHz sine at −6 dBFS and asserts DR0, a −6.02 dBFS sample peak and −6.01 LUFS — but Homebrew runs it only on `brew test`, not on install. Since 0.19.4 releases are published from Jenkins, which smoke-builds the CLI tier from the release tarball and bumps the tap only after all 15 OBS repositories publish — but it has no macOS agent, so the formulae are never built on a Mac before users get them. The Linux packages are built with crête’s own flags — distribution `CFLAGS`, LTO and debug builds all off — so bit-identity with the gated builds holds **by construction, not by comparison**. No figure on this site was measured with a packaged binary: the census is weekly #85, on 0.18.0. The packaged `crete` is the FFmpeg tier without `-f json`.',
+			'Since 0.19.2 `crete` and `crete-gui` are published for openSUSE, Fedora, Debian, Ubuntu and Arch, and the only check inside each package build is that the binary runs and reports the version it was packaged as. The Homebrew `crete` formula, since 0.19.3, carries a test that measures a 20 s 1 kHz sine at −6 dBFS and asserts DR0, a −6.02 dBFS sample peak and −6.01 LUFS — but Homebrew runs it only on `brew test`, not on install. Since 0.19.4 releases are published from Jenkins, which smoke-builds the CLI tier from the release tarball and bumps the tap only after all 15 OBS repositories publish — but it has no macOS agent, so the formulae are never built on a Mac before users get them. The Windows build, since 0.20.0, runs the synthetic self-checks and a JSON round trip on its JSON build; the shipped `crete.exe` is checked only for its version and its DLL imports, and nothing runs `crete-gui.exe`. The Linux packages are built with crête’s own flags — distribution `CFLAGS`, LTO and debug builds all off — so bit-identity with the gated builds holds **by construction, not by comparison**. No figure on this site was measured with a packaged binary: the census is weekly #85, on 0.18.0. The packaged `crete` is the FFmpeg tier without `-f json`.',
 		status: 'Open'
 	},
 	{
@@ -280,7 +280,7 @@ export const openItems = [
 	{
 		what: 'The reference cannot score short tracks',
 		measure:
-			'Below about 30 seconds MAAT declines to compute DR at all, needing ten 3-second windows. One DSD256 album logs 14 of 17 tracks; the suite pins that exemption to exactly those counts, conditionally, so a complete local run still passes.',
+			'Below about 30 seconds MAAT declines to compute DR at all, needing ten 3-second windows. One DSD256 album logs 14 of 17 tracks; the suite pins that exemption to exactly those counts, conditionally, so a complete local run still passes. 0.20.0 measured MAAT’s limit directly, on 28 synthetic PCM tracks of 3 to 45 s, at exactly 10.000 s — which does not match the figure above, so why this album’s three tracks go unscored is not established. The exemption stays pinned to its exact counts either way.',
 		status: 'Exempted by design'
 	},
 	{
