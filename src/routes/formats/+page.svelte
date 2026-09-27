@@ -671,7 +671,8 @@ index 4  lpcm              ac3`}</pre>
 					and the corpus ships each decoded to FLAC, so crête through the disc container must equal
 					crête on the FLAC <strong>exactly</strong>: two independent decode paths over the same
 					samples, nothing to calibrate. The suite is <strong>10/10</strong> on its first weekly,
-					#85, and fails all ten against the build before it. The whole JSON tracks array is
+					#85, and fails all ten against the build before it. With foobar measuring each FLAC it now
+					holds twelve tests, and has passed all twelve in every weekly since 0.19.5. The whole JSON tracks array is
 					byte-identical to 0.17.0 on all seven disc-audio carriers, so reading DVDs moved
 					nothing that was already measured.
 				</p>
@@ -1017,7 +1018,7 @@ reconstructed (no open MQA decoder exists).
 							20 s 1 kHz sine at −6 dBFS and asserts DR0, a −6.02 dBFS sample peak and −6.01 LUFS —
 							but Homebrew runs it only on <code>brew test</code>, not on install. For the Linux packages, bit-identity with the gated builds
 							holds by construction — the same flags — not by comparison. No figure on this site was measured with a
-							packaged binary: the current census is weekly #85, on 0.18.0.
+							packaged binary: the current census is weekly #96, on 0.20.0.
 						</p>
 					</div>
 					<div>

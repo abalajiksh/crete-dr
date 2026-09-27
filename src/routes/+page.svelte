@@ -40,12 +40,12 @@
 			<div class="stat-label">dependencies, default build</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">11,931</div>
+			<div class="stat-num">15,439</div>
 			<div class="stat-label">metric comparisons per weekly run</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">194 / 0</div>
-			<div class="stat-label">passed / failed, weekly #85</div>
+			<div class="stat-num">215 / 0</div>
+			<div class="stat-label">passed / failed, weekly #96</div>
 		</div>
 		<div class="stat">
 			<div class="stat-num accent">0.000e+00</div>

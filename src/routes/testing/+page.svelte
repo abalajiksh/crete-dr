@@ -9,14 +9,14 @@
 	<title>Testing — crête</title>
 	<meta
 		name="description"
-		content="Twelve thousand comparisons a week against an external reference: the pytest harness, the four tiers of oracle, what each suite gates, and every limitation still open."
+		content="Fifteen thousand comparisons a week against an external reference: the pytest harness, the four tiers of oracle, what each suite gates, and every limitation still open."
 	/>
 </svelte:head>
 
 <div class="wrap">
 	<header class="page-head">
 		<p class="kicker">Test pipeline</p>
-		<h1>Twelve thousand comparisons, every week, against something that is not crête.</h1>
+		<h1>Fifteen thousand comparisons, every week, against something that is not crête.</h1>
 		<p class="lede">
 			The harness is a separate pytest repository driven by Jenkins across two Linux agents of
 			different architecture. Corpora live in object storage and are staged per suite. A run does not
@@ -27,20 +27,20 @@
 
 	<section class="stats band">
 		<div class="stat">
-			<div class="stat-num">210</div>
-			<div class="stat-label">tests, weekly #85</div>
+			<div class="stat-num">231</div>
+			<div class="stat-label">tests, weekly #96</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">194</div>
+			<div class="stat-num">215</div>
 			<div class="stat-label">passed · 0 failed · 16 skipped</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">11,931</div>
-			<div class="stat-label">metric comparisons, 51 albums</div>
+			<div class="stat-num">15,439</div>
+			<div class="stat-label">metric comparisons, 63 albums</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">44</div>
-			<div class="stat-label">flagged (0.37 %), none catastrophic</div>
+			<div class="stat-num">77</div>
+			<div class="stat-label">flagged (0.50 %), none catastrophic</div>
 		</div>
 		<div class="stat">
 			<div class="stat-num accent">0</div>
@@ -142,6 +142,19 @@
 			the same three tests. Staging, not measurement — crête was pointed at a directory holding only
 			another directory, does not recurse, and said so. The check meant to catch it counted files
 			recursively, and a recursive count cannot see a level of nesting.
+		</p>
+		<p class="note narrow">
+			<strong>Weekly #96 qualified the 0.20.0 tag, and is the census on this site.</strong> It carries
+			sixteen reports: the fifteen above plus SMOKE, a second MAAT corpus of 11 PCM albums that the
+			Monday cron runs. On the fifteen #85 also had, it compares 12,073 values over 52 albums and
+			flags 44, as #85 did, with the same two album mismatches. The difference is a second cue album,
+			154 comparisons at Δ 0.000, and 12 fewer in FFMPEG_PARITY, where three tracks under 10 s no
+			longer carry a DR. That rule moved two album values between #94 and #95: Kill Bill Vol. 1 in
+			SMOKE read DR4 against MAAT's DR10 and now matches, and in CUE the per-track side of the
+			multi-file album went from DR9 to DR8, agreeing with its cue sheet, which read DR8 both times.
+			All sixteen reports are byte-identical below the header to #95's, the run on the short-track
+			commit before the version bump. Of the weeklies Jenkins holds between #85 and #96, two went
+			unstable, #87 and #92, both on the DVD <code>bad_alloc</code> that 0.19.5 fixed.
 		</p>
 	</section>
 
@@ -648,7 +661,7 @@ s06_dtshd_ma_2.0_96k.mkv      DCA     EXACT  0.000e+00`}</pre>
 
 <Footer {version}>
 	{#snippet note()}
-		Harness figures from weekly runs #53–#85. The pytest harness lives in a separate private
+		Harness figures from weekly runs #53–#96. The pytest harness lives in a separate private
 		repository.
 	{/snippet}
 </Footer>
