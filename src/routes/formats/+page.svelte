@@ -14,7 +14,8 @@
 		packages,
 		packageRepos,
 		installCmds,
-		brew
+		brew,
+		scoop
 	} from '$lib/formatsData.js';
 </script>
 
@@ -22,7 +23,7 @@
 	<title>Formats — crête</title>
 	<meta
 		name="description"
-		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DVD title sets, DSD decimation, MQA detection, the platform matrix, and the Linux and Homebrew packages."
+		content="crête's own decoders first, the opt-in FFmpeg tier second, and the routing rules that keep it out of the validated paths — plus disc audio, SACD images and DST, DVD title sets, DSD decimation, MQA detection, the platform matrix, and the Linux, Homebrew and Windows packages."
 	/>
 </svelte:head>
 
@@ -329,7 +330,7 @@ Use --stream N to choose.`}</pre>
 				<div>
 					<pre class="term">{`Format:   TRUEHD 24-bit / 48000 Hz
 Profile:  Dolby TrueHD + Dolby Atmos
-Layout:   7.1 · L R C LFE Lss Rss Lrs Rrs
+Layout:   7.1 · L R C LFE Lrs Rrs Lss Rss
           [bed -- Atmos objects not rendered]`}</pre>
 					<h4 class="val-head">Auro-3D is not detectable this way</h4>
 					<p class="note">
@@ -842,20 +843,21 @@ reconstructed (no open MQA decoder exists).
 			There is not one POSIX-threads call in the source — only C++17 standard threading — and file
 			dialogs and directory walking are already branched per platform. The only thing that ever
 			mattered for Windows was the toolchain's threading model. Linux packages ship from the openSUSE
-			Build Service since 0.19.2 and a Homebrew tap covers macOS since 0.19.3,
-			<a href="#packages">below</a>; Windows packaging, and a signed release matrix, are
-			<strong>scoped but not built</strong>.
+			Build Service since 0.19.2, a Homebrew tap covers macOS since 0.19.3, and Windows binaries and
+			a Scoop bucket since 0.20.0, <a href="#packages">below</a>. None of the binaries is
+			code-signed; a signed release matrix is <strong>scoped but not built</strong>.
 		</p>
 	</section>
 
 	<section class="section" id="packages">
 		<p class="kicker">10 — Packages</p>
-		<h2>The FFmpeg tiers, packaged for Linux and macOS</h2>
+		<h2>The FFmpeg tiers, packaged for Linux, macOS and Windows</h2>
 		<p class="intro">
-			Both channels ship the same two builds — <code>crete</code> from <code>make cli-ffmpeg</code>
+			Every channel ships the same two builds — <code>crete</code> from <code>make cli-ffmpeg</code>
 			and <code>crete-gui</code> from <code>make gui-ffmpeg</code> — with crête's own compact LGPL
-			FFmpeg linked statically. Since 0.19.4 a pushed release tag publishes both: OBS first, and the
-			tap only once every OBS repository has built and published that version.
+			FFmpeg linked statically. Since 0.19.4 a pushed release tag publishes them: OBS first, and the
+			Homebrew tap only once every OBS repository has built and published that version; since 0.20.0
+			the Windows build is attached to the Codeberg release and the Scoop bucket follows it.
 		</p>
 
 		<h3>Linux — the openSUSE Build Service</h3>
@@ -952,6 +954,34 @@ reconstructed (no open MQA decoder exists).
 
 		<div class="cols-tight sub">
 			<div>
+				<h3>Windows — a Scoop bucket, or the zip</h3>
+				<pre class="term">{#each scoop.cmds as [cmd, note], i (cmd)}{cmd}{#if note}{' '.repeat(
+								Math.max(1, 38 - cmd.length)
+							)}<span class="comment"># {note}</span>{/if}{#if i < scoop.cmds.length - 1}{'\n'}{/if}{/each}</pre>
+				<div class="btnrow spaced">
+					<a class="btn btn-secondary" href={scoop.releasesUrl}>Releases on Codeberg</a>
+					<a class="btn btn-secondary" href={scoop.bucketUrl}>Bucket source</a>
+				</div>
+			</div>
+			<div>
+				<p class="measure">
+					Since 0.20.0. Each Codeberg release carries a Windows x86_64 zip with its
+					<code>.sha256</code>: <code>crete.exe</code> and <code>crete-gui.exe</code>, both
+					<code>STATIC=1</code>, so there are no DLLs and no installer — keep the
+					<code>fonts</code> folder beside the GUI. The Scoop bucket installs that zip, puts both
+					commands on the path with a Start-menu shortcut for the GUI, and is bumped by the release
+					job. A winget package is prepared; its first submission is made by hand.
+				</p>
+				<p class="measure">
+					Built natively under MSYS2 on a Windows agent. The job runs the synthetic self-checks and a
+					JSON round trip on its JSON build; the shipped <code>crete.exe</code> is checked for its
+					version and its DLL imports, and nothing runs the GUI. The binaries are not code-signed.
+				</p>
+			</div>
+		</div>
+
+		<div class="cols-tight sub">
+			<div>
 				<h3>Built with crête's flags, not the distribution's</h3>
 				<p class="measure">
 					Every Linux recipe — the spec for openSUSE and Fedora, the Debian set, the PKGBUILD — removes the
@@ -973,7 +1003,7 @@ reconstructed (no open MQA decoder exists).
 					<div>
 						<h3>Not the JSON build</h3>
 						<p>
-							The packaged <code>crete</code>, on Linux and in Homebrew, is
+							The packaged <code>crete</code>, on every channel, is
 							<code>make cli-ffmpeg</code>, which has no
 							<code>-f json</code>. For the CI shape, build <code>make cli-json-ffmpeg</code> from
 							source.
@@ -1001,8 +1031,8 @@ reconstructed (no open MQA decoder exists).
 					<div>
 						<h3>x86_64 only outside openSUSE and Fedora</h3>
 						<p>
-							Debian, Ubuntu, Arch and Fedora Rawhide are built for x86_64 alone. There is no
-							Windows package.
+							Debian, Ubuntu, Arch and Fedora Rawhide are built for x86_64 alone, and so is Windows:
+							there is no Windows on ARM build.
 						</p>
 					</div>
 				</div>

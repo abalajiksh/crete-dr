@@ -38,14 +38,14 @@ export const flagGroups = [
 		id: 'measurement',
 		title: 'Measurement axes',
 		intro:
-			'The only three flags that change a DR figure on a PCM source. All three are written into every JSON result, because a measurement you cannot attribute to an algorithm is not a measurement. Two of them exist for A/B comparison and should not produce a number you then publish.',
+			'The only four flags that change a DR figure on a PCM source. All four are written into every JSON result, because a measurement you cannot attribute to an algorithm is not a measurement. Three of them exist for A/B comparison and should not produce a number you then publish.',
 		flags: [
 			{
 				flag: '--dr-blocks',
-				values: 'reference | legacy',
+				values: 'reference | legacy | foobar',
 				fallback: 'reference',
 				effect: 'numbers',
-				note: '*Which* 3 s blocks are ranked. `reference` is the PMF reference implementation — the trailing partial block is kept and normalised by its own length, and there is no gate. `legacy` is what crête shipped up to 0.13.1: trailing block discarded, blocks gated at `joint_rms > 1e-3`. It biases DR low. **A/B only.**'
+				note: '*Which* 3 s blocks are ranked. `reference` is the PMF reference implementation — the trailing partial block is kept and normalised by its own length, and there is no gate. `legacy` is what crête shipped up to 0.13.1: trailing block discarded, blocks gated at `joint_rms > 1e-3`. It biases DR low. `foobar`, added in 0.20.0, is the reference rules on a grid whose first full block starts 244 ms in, as measured on foobar2000 DR Meter 1.0.8; experimental, until a full weekly decides it. **A/B only.**'
 			},
 			{
 				flag: '--dr-mean',
@@ -60,6 +60,13 @@ export const flagGroups = [
 				fallback: 'exclude',
 				effect: 'numbers',
 				note: 'Whether the LFE is scored. Affects **TT DR only** — the DR mean, the joint sample and true peaks behind it, the block gate and `worst_channel`. Integrated loudness, Max M/S, LRA and Min PSR never move, because BS.1770-4 weights the LFE at zero. A no-op on mono and stereo, so no stereo measurement can change. `include` matches foobar2000’s DR Meter.'
+			},
+			{
+				flag: '--dr-short',
+				values: 'exclude | include',
+				fallback: 'exclude',
+				effect: 'numbers',
+				note: 'Tracks under 10 s. `exclude` gives such a track no DR — `DR--` in text, `null` in JSON with `dr_defined: false` — and leaves it out of the album DR, which is MAAT DROffline’s own limit, measured at exactly 10.000 s. Every other metric on the track is still reported. `include` reproduces ≤ 0.19.5, where a clip could score a raw DR of −100 and drag an album from DR10 to DR4. Added in 0.20.0. **A/B only.**'
 			}
 		]
 	},
@@ -167,7 +174,7 @@ export const flagGroups = [
 				values: null,
 				fallback: '—',
 				effect: 'none',
-				note: 'Prints the build’s tiers, the DSD engine and licence, the three DR axes as resolved, the full decimation chain — taps and group delay — for DSD64 through 512 at the current settings, and since 0.19.0 a `Host:` line with the CPUs and memory the machine reported. A version string alone would not say which algorithm produced a number.'
+				note: 'Prints the build’s tiers, the DSD engine and licence, the four DR axes as resolved, the full decimation chain — taps and group delay — for DSD64 through 512 at the current settings, and since 0.19.0 a `Host:` line with the CPUs and memory the machine reported. A version string alone would not say which algorithm produced a number.'
 			},
 			{
 				flag: '-h, --help',
@@ -228,6 +235,11 @@ export const provenance = [
 		key: 'dr_lfe · scored_channels',
 		when: 'every result',
 		what: 'The LFE scoring rule, and how many channels it left scored.'
+	},
+	{
+		key: 'dr_short · dr_defined',
+		when: 'every result · every track',
+		what: 'The short-track rule, and whether this track has a DR under it.'
 	},
 	{ key: 'standards', when: 'top level', what: 'Which specification governs each reported field.' },
 	{
@@ -301,6 +313,7 @@ export const recipes = [
 		lines: [
 			['crete --dr-lfe include /path/to/5.1/', 'match foobar2000’s multichannel rule'],
 			['crete --dr-blocks legacy /path/to/album/', 'reproduce a pre-0.14.0 recorded value'],
+			['crete --dr-short include /path/to/album/', 'reproduce a pre-0.20.0 album with short clips'],
 			['crete --dr-mean arithmetic /path/to/album/', 'reproduce a pre-0.12.1 recorded value']
 		]
 	}

@@ -103,7 +103,13 @@ is in data modules so a page template never has to change to add a row:
   README install section. The repository list is the one actually published
   under `download.opensuse.org/repositories/home:/abksh:/crete/` — check it
   there before adding or dropping a distribution. `brew` is the Homebrew tap,
-  from its own repo, `codeberg.org/abksh/homebrew-crete` (`Formula/*.rb`).
+  from its own repo, `codeberg.org/abksh/homebrew-crete` (`Formula/*.rb`), and
+  `scoop` the Scoop bucket, `codeberg.org/abksh/scoop-crete` (`bucket/crete.json`),
+  which installs the Windows zip attached to each Codeberg release.
+* Since 0.20.0 a Jenkins job in the Crete repo (Crete-Site,
+  `packaging/Jenkinsfile.site`) pushes each release's entry into `releases.js`
+  straight to `main`, generated from the annotated tag. It skips a version that
+  is already there, so an entry may be edited by hand after it lands.
 
 ## The screenshots
 
