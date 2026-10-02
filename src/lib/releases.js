@@ -34,6 +34,20 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.21.0',
+		date: '2026-10-02',
+		impact: ['moves'],
+		title: 'Speaker layout from the channel mask',
+		body: [
+			'crête now reads the speaker mask a file declares (`dwChannelMask` in a `WAVE_FORMAT_EXTENSIBLE` WAV, RF64 or Wave64, the `WAVEFORMATEXTENSIBLE_CHANNEL_MASK` tag in FLAC, and FFmpeg’s native channel layout) and takes speaker labels, the LFE and BS.1770 weights from it whenever it describes a layout the channel count does not. Up to 0.20.0 the count alone decided. An **Auro-3D 8.0** file (`L R Ls Rs HL HR HLs HRs`) was read as 7.1, with its `Rs` taken for an LFE and left out of DR and loudness. Auro 9.1 and larger fell to `N CH`, with the LFE scored and nothing weighted. 7.1(wide) weighted its front-of-centre pair as surrounds.',
+			'Numbers move only for such files. A mask that agrees with the count (5.1 with either surround pair, 7.1, quad), mono, stereo and files with no mask take the old path unchanged. On the reference corpus every measured value is bit-identical to 0.20.0 (see the qualification below), and nine Blu-ray, Auro-3D and DTS:X carriers gave identical JSON. *The corpus holds no masked non-default file, so the weekly does not exercise the new path.* `scripts/check_channel_mask.sh` gates it instead, with synthetic Auro 8.0 and 9.1 files whose loudness is arithmetic.',
+			'Weights on a masked layout are a stated choice: ear-level surrounds, back centre included, at +1.5 dB; front, front-of-centre and every height channel at unity, after BS.1770-4 Table 4. FFmpeg’s `ebur128` weights the top-back pair +1.5 dB, so on height layouts crête reads slightly lower than it. Masked layouts are named floor.lfe.height, as FFmpeg names them: Auro 9.1 is `5.1.4`.',
+			'Not covered yet: the DSF channel-type field and the DFF channel chunk, so a 4-channel DSF declaring L R C LFE is still read as quad. JSON gains `channel_mask_mode`, plus `channel_mask` where a mask described the layout, and the `--version` settings line gains `channel_mask=use`.',
+			'`--channel-mask ignore` gives the 0.20.0 numbers back.',
+			'**Qualified by Crete-Weekly #104** on `bcc038e`: tests: 215 passed, 0 failed, 16 skipped; compared 15,439 values against the references, 77 flagged (0.50 %), 0 catastrophic; against 0.20.0, 15,439 of 15,439 shared values bit-identical.'
+		]
+	},
+	{
 		version: '0.20.0',
 		date: '2026-09-26',
 		impact: ['moves', 'additive'],
