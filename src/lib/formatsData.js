@@ -116,7 +116,7 @@ export const ffmpeg = [
 	}
 ];
 
-/** The three DSD axes. Defaults are the parity-guaranteed path. */
+/** The four DSD axes. Defaults are the parity-guaranteed path. */
 export const dsdAxes = [
 	{
 		flag: '--dsd-mode multistage | direct',
@@ -129,6 +129,10 @@ export const dsdAxes = [
 	{
 		flag: '--dsd-filter default | firls | kaiser',
 		text: 'The ranked final stage, honoured only at 44.1 kHz output: equiripple at 383 taps and roughly 154 dB stopband (the golden default), least-squares at 767 taps as a cross-method check, or a Kaiser window at 4095 taps as the maximum decode.'
+	},
+	{
+		flag: '--dsd-bandwidth default | full | Hz',
+		text: 'Since 0.22.0. The output rate sets how densely the signal is sampled; the bandwidth sets how much of it is signal. `default` appends a linear-phase low-pass with a 50 kHz corner (Scarlet Book Annex D.1), which acts at 176.4 and 352.8 kHz output; at 44.1 kHz the final stage already brickwalls, and at 88.2 kHz the corner sits above Nyquist. `full` is the ≤ 0.21.0 decode.'
 	}
 ];
 
@@ -262,7 +266,7 @@ export const platforms = [
 	{
 		target: 'Windows x86-64',
 		state: 'built & self-checked',
-		note: 'Built natively under MSYS2 on a Windows 11 agent for every release since 0.20.0, and the JSON build runs `check_fix12.sh`, `check_lfe_peak.sh` and a JSON round trip. `STATIC=1` is not optional — without it the executable needs three runtime DLLs and the single-binary promise breaks — and an import of a MinGW runtime, SDL2 or FFmpeg DLL fails the build. No weekly result on this site was measured on Windows.'
+		note: 'Built natively under MSYS2 on a Windows 11 agent for 0.20.0 and 0.21.0. 0.22.0 has no Windows build: on its release the agent’s Application Control policy blocked MSYS2’s `bash.exe` before anything compiled, so that release carries no Windows zip. The JSON build runs `check_fix12.sh`, `check_lfe_peak.sh` and a JSON round trip. `STATIC=1` is not optional — without it the executable needs three runtime DLLs and the single-binary promise breaks — and an import of a MinGW runtime, SDL2 or FFmpeg DLL fails the build. No weekly result on this site was measured on Windows.'
 	},
 	{
 		target: 'Windows on ARM',

@@ -27,20 +27,20 @@
 
 	<section class="stats band">
 		<div class="stat">
-			<div class="stat-num">231</div>
-			<div class="stat-label">tests, weekly #96</div>
+			<div class="stat-num">233</div>
+			<div class="stat-label">tests, weekly #106</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">215</div>
+			<div class="stat-num">217</div>
 			<div class="stat-label">passed · 0 failed · 16 skipped</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">15,439</div>
-			<div class="stat-label">metric comparisons, 63 albums</div>
+			<div class="stat-num">15,483</div>
+			<div class="stat-label">metric comparisons, 65 albums</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">77</div>
-			<div class="stat-label">flagged (0.50 %), none catastrophic</div>
+			<div class="stat-num">64</div>
+			<div class="stat-label">flagged (0.41 %), none catastrophic</div>
 		</div>
 		<div class="stat">
 			<div class="stat-num accent">0</div>
@@ -144,7 +144,7 @@
 			recursively, and a recursive count cannot see a level of nesting.
 		</p>
 		<p class="note narrow">
-			<strong>Weekly #96 qualified the 0.20.0 tag, and is the census on this site.</strong> It carries
+			<strong>Weekly #96 qualified the 0.20.0 tag.</strong> It carries
 			sixteen reports: the fifteen above plus SMOKE, a second MAAT corpus of 11 PCM albums that the
 			Monday cron runs. On the fifteen #85 also had, it compares 12,073 values over 52 albums and
 			flags 44, as #85 did, with the same two album mismatches. The difference is a second cue album,
@@ -155,6 +155,34 @@
 			All sixteen reports are byte-identical below the header to #95's, the run on the short-track
 			commit before the version bump. Of the weeklies Jenkins holds between #85 and #96, two went
 			unstable, #87 and #92, both on the DVD <code>bad_alloc</code> that 0.19.5 fixed.
+		</p>
+		<p class="note narrow">
+			<strong>Weekly #106 qualified the 0.22.0 tag, and is the census on this site.</strong> Between
+			it and #96 the totals did not move until 0.22.0: #104, which qualified 0.21.0, found all 15,439
+			values bit-identical to 0.20.0's, as the channel-mask change predicted, since the corpus holds
+			no file whose mask disagrees with its count. In #106 eleven of the sixteen reports are still
+			byte-identical below the header to #96's. The five that changed are the four DSD suites and the
+			round trip. Album DR now matches on 59 of 60: <code>Thriller_DSD64@352800</code>, 16 against
+			the reference's 15 in #96, matches; DSD64 flags fall from 19 to 5 and its four track-level DR
+			mismatches, all on Thriller at 352.8 kHz, to none. One flag is new, a DSD128 track at 352.8 kHz whose DR
+			LEFT is 0.53 off against a 0.50 tolerance. The only album mismatch left is
+			<code>BoneyM_10k_DSD128@44100</code>, the <code>.5</code> boundary at the default rate. The
+			round trip grew from one case to three, which is the 44 extra comparisons.
+		</p>
+		<p class="note narrow">
+			<strong>One count in #106 is a harness fault, not a measurement.</strong> Against 0.21.0 the
+			qualification reports 772 of 15,439 shared values moved, largest 4.831. 750 are the
+			352.8 kHz values in the four DSD suites, which the band limit was meant to move; no
+			44.1 kHz value moved. The other 22 are the round trip: all three of its cases recorded under one
+			key in the measurement file, so the 352.8 kHz <code>full</code> values overwrote the 44.1 kHz
+			ones. crete-pytest now keys the round trip by rate and bandwidth; the first weekly after it will
+			show those 22 moving back. Of the weeklies Jenkins holds between #96 and #106, one went unstable:
+			#99, a manual run with <code>--dr-blocks foobar</code>, failed two tests whose premises held
+			only on the reference grid: one extra decoder frame on the DTS-HD MA carrier fell into a loud
+			trailing block instead of forming its own, and a quad track sat 0.007 dB either side of a
+			<code>.5</code> against foobar. The harness now measures that carrier pair with the legacy
+			block set and judges a quad integer flip on raw DR; #101, also on the foobar grid, passed.
+			#97 to #101 kept no artifacts, only their test results.
 		</p>
 	</section>
 
@@ -553,6 +581,17 @@
 				44.1 kHz the 4×-oversampled true peak is −2.630 against a sample peak of −2.654, so there is
 				essentially no overshoot to find.
 			</p>
+			<p class="note rules">
+				<strong>Overtaken in 0.22.0, on different terms.</strong> The band limit now lives in the
+				decoder — <code>--dsd-bandwidth</code>, a 50 kHz linear-phase low-pass by default at 176.4 and
+				352.8 kHz — so the exports the reference measures carry it too, and the 352.8 kHz references
+				were re-recorded with it. That answers the objection above: the filtered number now has a
+				reference. Weekly #106 matches album DR at 352.8 kHz on all eight DSD albums, and
+				<code>--dsd-bandwidth full</code> reproduces the unfiltered row. The reference's DR14 is explained as
+				well: synthetic probes in October showed that MAAT pins a block peak above 0 dBFS to 0, so
+				on over-full-scale material its DR drops by the overshoot of the second-highest block peak,
+				about 1.6 dB here. 44.1 kHz remains the only parity rate.
+			</p>
 		</article>
 
 		<article class="case">
@@ -631,6 +670,20 @@ s06_dtshd_ma_2.0_96k.mkv      DCA     EXACT  0.000e+00`}</pre>
 			their own floors, which manufactures a 20 dB "failure" out of digital silence. The suite now
 			asserts DR equal to zero on both sides rather than skipping the case.
 		</p>
+		<p class="note rules">
+			<strong>The reference, modelled.</strong> In October 2026 MAAT DROffline MkII v2.2.3 measured
+			about 630 synthetic probe files at 44.1 to 384 kHz, and a model of its TT DR now reproduces all
+			1256 per-channel values within its 0.01 display step, 81 % exactly. Its blocks are
+			3 × 44160/44100 s, 3.004082 s at every rate, so the grid drifts 4.08 ms per block against a
+			3.000 s one — 245 ms after 60 blocks, which is why long tracks disagree most. It pins block
+			peak and RMS to −80…0 dBFS, truncates DR to two decimals and rounds half to even. Its true
+			peak oversamples 4× at 44.1 and 48 kHz, 2× at 88.2 and 96 kHz and not at all from 176.4 kHz,
+			and it computes loudness only at a fixed list of rates that leaves out 352.8 kHz. Its
+			K-weighting follows the analogue curve rather than BS.1770's digital filter, which reads 0.04 to
+			0.05 LU low at 44.1 and 48 kHz; crête's LUFSi residual against MAAT in weekly #106 is an average
+			|Δ| of 0.040 dB over 430 comparisons. None of it is adopted: crête stays on the published procedures,
+			and what the harness should do with the model is undecided.
+		</p>
 	</section>
 
 	<section class="section">
@@ -661,7 +714,7 @@ s06_dtshd_ma_2.0_96k.mkv      DCA     EXACT  0.000e+00`}</pre>
 
 <Footer {version}>
 	{#snippet note()}
-		Harness figures from weekly runs #53–#96. The pytest harness lives in a separate private
+		Harness figures from weekly runs #53–#106. The pytest harness lives in a separate private
 		repository.
 	{/snippet}
 </Footer>

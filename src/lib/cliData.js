@@ -38,7 +38,7 @@ export const flagGroups = [
 		id: 'measurement',
 		title: 'Measurement axes',
 		intro:
-			'The only four flags that change a DR figure on a PCM source. All four are written into every JSON result, because a measurement you cannot attribute to an algorithm is not a measurement. Three of them exist for A/B comparison and should not produce a number you then publish.',
+			'The only five flags that change a DR figure on a PCM source. All five are written into every JSON result, because a measurement you cannot attribute to an algorithm is not a measurement. Four of them exist for A/B comparison and should not produce a number you then publish.',
 		flags: [
 			{
 				flag: '--dr-blocks',
@@ -67,6 +67,13 @@ export const flagGroups = [
 				fallback: 'exclude',
 				effect: 'numbers',
 				note: 'Tracks under 10 s. `exclude` gives such a track no DR — `DR--` in text, `null` in JSON with `dr_defined: false` — and leaves it out of the album DR, which is MAAT DROffline’s own limit, measured at exactly 10.000 s. Every other metric on the track is still reported. `include` reproduces ≤ 0.19.5, where a clip could score a raw DR of −100 and drag an album from DR10 to DR4. Added in 0.20.0. **A/B only.**'
+			},
+			{
+				flag: '--channel-mask',
+				values: 'use | ignore',
+				fallback: 'use',
+				effect: 'numbers',
+				note: 'Whether the speaker mask a file declares — `dwChannelMask` in an extensible WAV, RF64 or Wave64, the channel-mask tag in FLAC, FFmpeg’s native layout — decides the labels, the LFE and the loudness weights when it describes a layout the channel count does not. An Auro-3D 8.0 file is otherwise read as 7.1, with a surround taken for an LFE and left out. A mask that agrees with the count, and every mono and stereo file, takes the old path unchanged. `ignore` reproduces ≤ 0.20.0. Added in 0.21.0. **A/B only.**'
 			}
 		]
 	},
@@ -88,7 +95,14 @@ export const flagGroups = [
 				values: '44100 | 88200 | 176400 | 352800',
 				fallback: '44100',
 				effect: 'numbers',
-				note: '44 100 is the rate every DSD parity claim on this site is made at. The higher rates retain ultrasonic noise-shaping that inflates DR by **+1…+3**, which is a property of the format, not a defect in the decode — they are for analysis, not for comparison against a reference.'
+				note: '44 100 is the rate every DSD parity claim on this site is made at. Above 48 kHz the decimation cascade alone keeps the modulator’s shaped ultrasonic noise, which inflates RMS, peak and DR — a property of the format, not a defect in the decode. Since 0.22.0 `--dsd-bandwidth` removes most of it at 176 400 and 352 800 by default, but a 50 kHz band still holds content the 44.1 kHz decode does not, so the higher rates are for analysis, not for parity.'
+			},
+			{
+				flag: '--dsd-bandwidth',
+				values: 'default | full | Hz',
+				fallback: 'default',
+				effect: 'numbers',
+				note: 'The band limit on the decoded PCM. `default` appends a linear-phase low-pass with a **50 kHz** corner — the Scarlet Book Annex D.1 measurement band, flat to the corner, at least 153 dB down from 1.4 times it, unity DC. `full` turns it off and reproduces ≤ 0.21.0; a number is a corner in Hz, at least 20 000. It acts only where the corner sits below the output Nyquist: with the default that is 176 400 and 352 800, while 44 100 already brickwalls and 88 200 is bit-identical to 0.21.0. JSON records `dsd_bandwidth` and whether it ran, `dsd_bandwidth_applied`. Added in 0.22.0.'
 			},
 			{
 				flag: '--dsd-filter',
@@ -174,7 +188,7 @@ export const flagGroups = [
 				values: null,
 				fallback: '—',
 				effect: 'none',
-				note: 'Prints the build’s tiers, the DSD engine and licence, the four DR axes as resolved, the full decimation chain — taps and group delay — for DSD64 through 512 at the current settings, and since 0.19.0 a `Host:` line with the CPUs and memory the machine reported. A version string alone would not say which algorithm produced a number.'
+				note: 'Prints the build’s tiers, the DSD engine and licence, the five DR axes as resolved, the full decimation chain — taps and group delay — for DSD64 through 512 at the current settings, and since 0.19.0 a `Host:` line with the CPUs and memory the machine reported. A version string alone would not say which algorithm produced a number.'
 			},
 			{
 				flag: '-h, --help',
@@ -241,6 +255,11 @@ export const provenance = [
 		when: 'every result · every track',
 		what: 'The short-track rule, and whether this track has a DR under it.'
 	},
+	{
+		key: 'channel_mask_mode · channel_mask',
+		when: 'every result · masked layouts',
+		what: 'Whether a declared speaker mask was honoured, and the mask itself wherever it, not the channel count, described the layout.'
+	},
 	{ key: 'standards', when: 'top level', what: 'Which specification governs each reported field.' },
 	{
 		key: 'warnings',
@@ -248,9 +267,9 @@ export const provenance = [
 		what: 'Failed decodes, CRC mismatches, truncation and the multi-stream choice. Always present, so an empty array is the positive statement that nothing was wrong.'
 	},
 	{
-		key: 'dsd_mode · dsd_filter · dsd_out_rate',
+		key: 'dsd_mode · dsd_filter · dsd_out_rate · dsd_bandwidth · dsd_bandwidth_applied',
 		when: 'DSD sources',
-		what: 'The full decode configuration. An unlabelled DSD result is not interpretable.'
+		what: 'The full decode configuration, and whether the band limit actually ran at that output rate. An unlabelled DSD result is not interpretable.'
 	},
 	{
 		key: 'stream_index · audio_stream_count',
@@ -314,6 +333,8 @@ export const recipes = [
 			['crete --dr-lfe include /path/to/5.1/', 'match foobar2000’s multichannel rule'],
 			['crete --dr-blocks legacy /path/to/album/', 'reproduce a pre-0.14.0 recorded value'],
 			['crete --dr-short include /path/to/album/', 'reproduce a pre-0.20.0 album with short clips'],
+			['crete --channel-mask ignore /path/to/auro/', 'reproduce a pre-0.21.0 masked layout'],
+			['crete --dsd-out-rate 352800 --dsd-bandwidth full /path/to/dsd/', 'reproduce a pre-0.22.0 high-rate DSD value'],
 			['crete --dr-mean arithmetic /path/to/album/', 'reproduce a pre-0.12.1 recorded value']
 		]
 	}

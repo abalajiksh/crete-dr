@@ -17,7 +17,7 @@
 	<title>CLI reference — crête</title>
 	<meta
 		name="description"
-		content="Every crête command-line flag, its default, and whether it moves a number: the four DR axes, the three DSD decode axes, SACD area and stream selection, the five output formats, exit status and parallelism."
+		content="Every crête command-line flag, its default, and whether it moves a number: the five DR axes, the four DSD decode axes, SACD area and stream selection, the five output formats, exit status and parallelism."
 	/>
 </svelte:head>
 
@@ -36,7 +36,7 @@
 
 	<section class="stats band">
 		<div class="stat">
-			<div class="stat-num">14</div>
+			<div class="stat-num">18</div>
 			<div class="stat-label">flags in total</div>
 		</div>
 		<div class="stat">
@@ -44,11 +44,11 @@
 			<div class="stat-label">needed for a correct run</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">3</div>
+			<div class="stat-num">5</div>
 			<div class="stat-label">axes recorded in every JSON row</div>
 		</div>
 		<div class="stat">
-			<div class="stat-num">2</div>
+			<div class="stat-num">3</div>
 			<div class="stat-label">marked A/B-only in the help text</div>
 		</div>
 	</section>

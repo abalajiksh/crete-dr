@@ -98,11 +98,11 @@ export const builds = [
 export const limits = [
 	{
 		head: '44.1 kHz is the parity-guaranteed DSD rate.',
-		body: '88.2 / 176.4 / 352.8 kHz output is offered for analysis, not parity — retained ultrasonic noise-shaping inflates DR by +1…+3 there. At the default rate the continuous per-track DR comparison flags nothing on any of the 8 DSD albums and album DR matches on 7 of 8; the exception misses a `.5` boundary by 0.020 dB and is an accuracy question, not a rate one.'
+		body: '88.2 / 176.4 / 352.8 kHz output is offered for analysis, not parity. Retained ultrasonic noise-shaping inflated DR by +1…+3 at 352.8 kHz; since 0.22.0 a 50 kHz band limit in the decoder removes most of that, but the band still holds content the 44.1 kHz decode does not. At the default rate the continuous per-track DR comparison flags nothing on any of the 8 DSD albums and album DR matches on 7 of 8; the exception misses a `.5` boundary by 0.020 dB and is an accuracy question, not a rate one.'
 	},
 	{
 		head: 'Min PSR disagrees with the reference by design.',
-		body: 'MAAT uses a 0.5 dB/s decaying peak-hold; crête implements the published AES eBrief 373 formula. Average delta 0.576 dB over 571 comparisons in weekly #96 — the worst metric in the suite.'
+		body: 'MAAT uses a 0.5 dB/s decaying peak-hold; crête implements the published AES eBrief 373 formula. Average delta 0.574 dB over 573 comparisons in weekly #106 — the worst metric in the suite.'
 	},
 	{
 		head: 'MQA is detected, never decoded.',
@@ -110,7 +110,7 @@ export const limits = [
 	},
 	{
 		head: 'Atmos and DTS:X are measured as their channel bed.',
-		body: 'There is no renderer in the chain. Object metadata is discarded, and since 0.15.0 the output names the profile and marks the layout as a bed. Auro-3D cannot be identified this way and is not attempted.'
+		body: 'There is no renderer in the chain. Object metadata is discarded, and since 0.15.0 the output names the profile and marks the layout as a bed. An Auro-3D carrier cannot be identified this way and is not attempted; a discrete Auro-3D file, which declares its speakers, is labelled from its channel mask since 0.21.0.'
 	},
 	{
 		head: 'Disc audio and SACD have no external oracle.',
@@ -160,7 +160,7 @@ export const reach = [
 	{
 		head: 'Mono through 7.1, measured per channel',
 		state: 'gated',
-		body: 'Per-channel DR, peak, true peak, RMS and loudness with BS.1770-4 weighting, the LFE measured in full but not scored, and the multichannel rule **stated as a chosen rule** rather than implied. SURROUND runs 1620 comparisons, QUADIO 240 with zero flags, DTSX 350. The MAAT reference rows crête holds carry at most two channels, which is why those suites are gated against stems — there is no external oracle for a 5.1 figure.'
+		body: 'Per-channel DR, peak, true peak, RMS and loudness with BS.1770-4 weighting, the LFE measured in full but not scored, and the multichannel rule **stated as a chosen rule** rather than implied. SURROUND runs 1620 comparisons, QUADIO 240 with zero flags, DTSX 350. The MAAT reference rows crête holds carry at most two channels, which is why those suites are gated against stems — there is no external oracle for a 5.1 figure. Since 0.21.0 a declared channel mask sets the labels, LFE and weights for layouts the count cannot express, such as Auro-3D 8.0 and 9.1; the corpus holds no such file, so that path is gated by a synthetic self-check, not by the weekly.'
 	},
 	{
 		head: 'Two architectures, compared to each other every week',
