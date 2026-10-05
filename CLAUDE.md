@@ -19,118 +19,76 @@ machine. `bun install`, `bun run dev`, `bun run build`.
 
 ## The rules that matter
 
-* **Every route is prerendered.** `src/routes/+layout.js` sets
-  `prerender = true` and `trailingSlash = 'always'`, and the adapter runs with
-  `strict: true` — so a route that can't be prerendered fails the build rather
-  than shipping broken. Don't add anything that needs a server at request time.
-* **`adapter-static`, not `adapter-cloudflare`.** The output is plain files.
-  `wrangler.jsonc` declares `assets.directory = ./build` and deliberately has
-  **no `main`**, so it deploys as static assets with no Worker script. Validate
-  config changes with `bunx wrangler deploy --dry-run` (no auth needed).
-* **The site makes no third-party request.** The design file loads Archivo and
-  IBM Plex Mono from Google Fonts; `src/fonts.css` declares the same faces from
-  `static/fonts/` instead, and `src/app.css` has that `@import` stripped. Don't
-  reintroduce a Google Fonts `<link>` or `@import`. Archivo is a variable font
-  declared `font-weight: 400 800`, so the heading weight is a real master rather
-  than a synthesised bold. `app.html` preloads only the two latin faces.
-* **Four stylesheet layers**, imported in `+layout.svelte` in this order:
-  `fonts.css` → `app.css` (the vendored design system) → `site.css` (the
-  light/dark shell) → `pages.css` (layout utilities). Page-specific styling goes
-  in the component's own scoped `<style>`.
-* **`src/app.css` is vendored** from the Modernist design system in the
-  (gitignored) `temp/design/_ds/` folder. Treat it as vendored: take colours,
-  fonts, spacing and radii from its `var(--…)` tokens and don't hard-code a hex,
-  a font name or a px value the tokens already carry. Its rules are load-bearing
-  — **no rounded corners anywhere** (`--radius-md` is 0 on purpose), 2px
-  dividers never softened to hairlines, button labels and headings flush left,
-  and the accent used sparingly except in the poster band.
-* **The theme is resolved in `app.html` before first paint** — an inline script
-  stamps `data-theme` on `<html>`. `src/lib/theme.js` holds the toggle and must
-  keep the same localStorage key (`crete-theme`). The design shipped this as
-  inline custom properties set by JS; here the same values are plain CSS in
-  `site.css`, keyed off that attribute.
-* **No `{@html}` anywhere.** The copy in the data files carries three inline
-  marks — `` `code` ``, `**strong**`, `*em*` — tokenised by `src/lib/inline.js`
-  and rendered through `Inline.svelte` as text nodes. Keep it that way; a flag
-  name with an angle bracket must not be able to become markup.
-* **`static/404.html` is hand-written static HTML**, not a SvelteKit route.
-  There is deliberately no `fallback` in `svelte.config.js`: the fallback shell
-  renders blank without JavaScript, which is a poor 404. It's the one file
-  allowed to repeat design-token values, since it can't link the fingerprinted
-  app CSS.
+* **Every route is prerendered** (`src/routes/+layout.js`: `prerender = true`,
+  `trailingSlash = 'always'`; adapter `strict: true`). Don't add anything that
+  needs a server at request time.
+* **`adapter-static`, not `adapter-cloudflare`.** `wrangler.jsonc` has
+  `assets.directory = ./build` and deliberately **no `main`**. Validate config
+  changes with `bunx wrangler deploy --dry-run`.
+* **No third-party requests.** Fonts are self-hosted from `static/fonts/` via
+  `src/fonts.css`. Don't reintroduce a Google Fonts `<link>` or `@import`.
+* **Four stylesheet layers**, in this order in `+layout.svelte`: `fonts.css` →
+  `app.css` → `site.css` → `pages.css`. Page-specific styling goes in the
+  component's scoped `<style>`.
+* **`src/app.css` is vendored** (Modernist design system). Use its `var(--…)`
+  tokens; never hard-code a hex, font name or px value they carry. **No rounded
+  corners anywhere**, 2px dividers stay 2px, headings and button labels flush
+  left, accent used sparingly except in the poster band.
+* **Theme is resolved in `app.html` before first paint** (`data-theme` on
+  `<html>`). `src/lib/theme.js` must keep the localStorage key `crete-theme`.
+* **No `{@html}` anywhere.** Inline marks (`` `code` ``, `**strong**`, `*em*`)
+  go through `src/lib/inline.js` → `Inline.svelte` as text nodes.
+* **`static/404.html` is hand-written static HTML**, not a route; no `fallback`
+  in `svelte.config.js`. It's the one file allowed to repeat token values.
 
 ## Content, and the one rule about it
 
 **Every figure on this site is a real measurement from the Crete repo or the
-crete-pytest harness.** They were checked against those repos line by line when
-the site was built and re-checked at each weekly since — the current census is
-weekly `#96` (0.20.0, the run that qualified the v0.20.0 tag) at `231/215/0/16`
-tests, `15,439` comparisons over `63` albums, `77` flagged, `0.576 dB` average
-Min PSR over `571`, `273` cross-arch fields. Its 16 detailed reports (the 15
-`#85` had, plus SMOKE) are identical to `#95`'s below the header. On the 15
-`#85` also had it is `12,073` comparisons over `52` albums and `44` flags.
-`#87` and `#92` went unstable on the DVD `bad_alloc` and `#81`/`#82` on corpus
-staging; none is the census. Where a
-figure belongs to a specific past experiment it stays pinned to it: `2241` DR
-comparisons and `0.0262` mean |Δ| are the #68→#69 block-set A/B, not a current
-count. If you change a number, you must have a source in one of those two repos
-for the new one. Don't round, don't approximate, and don't carry a figure
-forward because it was already on the page.
+crete-pytest harness.** If you change a number, you must have a source in one
+of those two repos for the new one. Don't round, don't approximate, and don't
+carry a figure forward because it was already on the page. Figures tied to a
+past experiment stay pinned to it.
 
-The archived weekly runs live in the Crete repo's (gitignored) `temp/` folder as
-`archiveNN.zip`; each holds `archive/test-results/<suite>_detailed.txt` with the
-per-album and global metric summaries every suite figure here comes from. Recent
-weeklies are also on Jenkins (`jenkins.insightsintoinfinite.com`, job
-`Crete/Crete-Weekly`, `artifact/*zip*/archive.zip`, including `allure-report.zip`,
-whose attachments carry the cross-arch field count), and Crete-Tag attaches the
-qualifying weekly's reports to each Codeberg release. Min PSR's average is the
-count-weighted mean of the reports' three-decimal suite averages.
+Sources: the Crete repo's gitignored `temp/archiveNN.zip`
+(`archive/test-results/<suite>_detailed.txt`), and Jenkins job
+`Crete/Crete-Weekly` (`artifact/*zip*/archive.zip`).
 
-The honesty is the product. The Testing page's "Known limitations" table and the
-Formats page's caveats are deliberately unflattering. **Don't soften a caveat,
-upgrade a status, or drop an open item without being asked.**
+**The honesty is the product.** Don't soften a caveat, upgrade a status, or
+drop an open item on the Testing or Formats pages without being asked.
 
 ## Where the content lives
 
-Page copy is ported from the design files in `temp/design/` (gitignored), which
-came from `temp/Crete website design kickoff.zip`. Tabular and repeated content
-is in data modules so a page template never has to change to add a row:
+Tabular content lives in data modules so templates never change to add a row:
 
-* `src/lib/releases.js` — the release history, **derived from the Crete repo's
-  tags and release commits**, not from the design file. `version.js` reads the
-  current version from its first entry, so that is the only place to bump.
-  Every entry carries an `impact`: whether recorded measurements still compare.
-  A meter's changelog must answer that for each release — don't add an entry
-  without deciding it, and where numbers moved, name the flag that reproduces
-  the old behaviour.
-* `src/lib/homeData.js`, `testingData.js`, `formatsData.js` — the metric table,
-  DR bands, build matrix, suites, oracles, limitations, decoder tables and
-  platform matrix.
-* `formatsData.js` also holds the Linux package tables (`obs`, `packages`,
-  `packageRepos`, `installCmds`), from the Crete repo's `packaging/obs/` and
-  README install section. The repository list is the one actually published
-  under `download.opensuse.org/repositories/home:/abksh:/crete/` — check it
-  there before adding or dropping a distribution. `brew` is the Homebrew tap,
-  from its own repo, `codeberg.org/abksh/homebrew-crete` (`Formula/*.rb`), and
-  `scoop` the Scoop bucket, `codeberg.org/abksh/scoop-crete` (`bucket/crete.json`),
-  which installs the Windows zip attached to each Codeberg release.
-* Since 0.20.0 a Jenkins job in the Crete repo (Crete-Site,
-  `packaging/Jenkinsfile.site`) pushes each release's entry into `releases.js`
-  straight to `main`, generated from the annotated tag. It skips a version that
-  is already there, so an entry may be edited by hand after it lands.
-
-## The screenshots
-
-`homeData.js` `shots[]` has three GUI capture slots, all with `src: null`, which
-render as labelled hatched placeholders via `Figure.svelte`. Dropping a real
-capture in means adding the file to `static/screenshots/` and setting `src` —
-no component change. The existing PNGs in the Crete repo's `screenshots/` are
-from July and predate 0.14.0, so they were deliberately **not** used.
+* `src/lib/releases.js` — derived from the Crete repo's tags, not the design
+  file. The first entry is the only version bump. Every entry needs an
+  `impact` (do recorded measurements still compare?); where numbers moved, name
+  the flag that restores the old behaviour. The Crete-Site Jenkins job pushes
+  new entries to `main` automatically; hand edits after that are fine.
+* `src/lib/homeData.js`, `testingData.js`, `formatsData.js` — metric table, DR
+  bands, build matrix, suites, oracles, limitations, decoders, platforms, and
+  Linux package tables. Check the OBS repository list at
+  `download.opensuse.org/repositories/home:/abksh:/crete/` before adding or
+  dropping a distribution.
+* Screenshots: `homeData.js` `shots[]`; add a file to `static/screenshots/` and
+  set `src`. Don't use the old PNGs in the Crete repo's `screenshots/`.
 
 ## Verifying
 
-`bun run build` is the real check — prerendering exercises every route, and
-`strict: true` means a broken internal link fails the build rather than shipping
-a 404. For visual checks, `bun run dev` and the Browser pane; note that
-`document.documentElement.style.zoom` works for whole-page captures where
-`document.body.style.zoom` does not.
+`bun run build` is the real check (prerender + `strict: true` catches broken
+routes and links). Visual checks: `bun run dev` and the Browser pane; use
+`document.documentElement.style.zoom` for whole-page captures.
+
+## Long-term knowledge (Cognee)
+
+History and background live in Cognee, dataset `project_crete_dr`: the current
+weekly census figures and which runs were unstable, where the design files came
+from, why each rule exists, the full package-source details. Cognee is one
+shared store (the dataset filter does not isolate projects, and the Crete repo's
+own notes sit right beside these), so **put "crête website" in the query** and
+check provenance: a result that starts with a `Source:` line names its file (`/Users/ashwinbalaji/Projects/crete-dr/CLAUDE.md` for this project); a chunk from mid-section has none, so judge it by content. Recall before changing
+figures or a rule's area.
+
+For one specific fact, `recall` with `search_type="CHUNKS"` and the
+distinctive terms (a function name, a flag, an item ID): the default mode
+tends to return the surrounding section instead.

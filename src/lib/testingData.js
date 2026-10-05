@@ -1,15 +1,18 @@
 // Content for the Testing page. Figures are from the harness's own weekly
-// reports (#53–#96) as recorded in the Crete working record and on Jenkins; the
+// reports (#53–#106) as recorded in the Crete working record and on Jenkins; the
 // suite table mirrors what crete-pytest actually gates.
 //
 // Comparison counts, flag counts and per-metric averages are read off the
-// per-suite detailed reports for weekly #96 — the run that qualified the v0.20.0
-// tag, on 37327b0 — as archived by Jenkins and attached to that Codeberg release.
-// All 16 of its detailed reports are byte-identical below the header to #95's,
-// on dd75a77, the short-track commit before the version bump. The Min PSR
+// per-suite detailed reports for weekly #106 — the run that qualified the v0.22.0
+// tag, on 6c9a999 — as archived by Jenkins and attached to that Codeberg release.
+// Eleven of its 16 detailed reports are byte-identical below the header to #96's
+// (0.20.0); the five that differ are DSD64/128/256/512 and DSD_ROUNDTRIP, which
+// 0.22.0's band limit and the re-recorded 352.8 kHz references changed. #104
+// (0.21.0) compares bit-identical to #96 on all 15,439 values. The Min PSR
 // average is the count-weighted mean of the 16 reports' three-decimal suite
 // averages, so it is good to ±0.0005 dB. #85's artifacts are no longer on
-// Jenkins; where a figure is still pinned to #77 or #85 below, it says so.
+// Jenkins, nor are #97–#101's; where a figure is still pinned to an earlier run
+// below, it says so.
 
 /** The pipeline, corpus to verdict. */
 export const pipeline = [
@@ -49,7 +52,7 @@ export const oracles = [
 	{
 		rank: 'Tier 2 · cross-check',
 		name: 'foobar2000 DR Meter',
-		text: 'Retired as a routine oracle, kept as an *independent second implementation*. That distinction earned its keep: on 264 per-channel values foobar and MAAT agreed with each other to a mean of 0.006 dB while crête sat 0.095 from both — proof the residual was crête’s, not reference noise. It is back for **one rule MAAT cannot adjudicate**: MAAT reads at most two channels, so no MAAT row holds an LFE, and foobar is the only measured implementation of the all-channel rule `--dr-lfe include` reproduces. Validated before any row was written, pairing by track number: album DR matches **exactly** on all three 5.1 albums, per-channel DR to a mean of 0.036 dB over 264 values, and on 4.0 — where the two rules are the same rule — every track integer matches and the flag is byte-inert. Added after weekly #85; first through a weekly in #86, and passing in every weekly Jenkins holds since, to #96.'
+		text: 'Retired as a routine oracle, kept as an *independent second implementation*. That distinction earned its keep: on 264 per-channel values foobar and MAAT agreed with each other to a mean of 0.006 dB while crête sat 0.095 from both — proof the residual was crête’s, not reference noise. It is back for **one rule MAAT cannot adjudicate**: MAAT reads at most two channels, so no MAAT row holds an LFE, and foobar is the only measured implementation of the all-channel rule `--dr-lfe include` reproduces. Validated before any row was written, pairing by track number: album DR matches **exactly** on all three 5.1 albums, per-channel DR to a mean of 0.036 dB over 264 values, and on 4.0 — where the two rules are the same rule — every track integer matches and the flag is byte-inert. Added after weekly #85; first through a weekly in #86, and passing in every weekly Jenkins holds since, to #106, but one: #99, a manual run on the experimental foobar block grid, where a quad track sat 0.007 dB either side of a `.5` and the integers split. The harness now judges such a flip on raw DR.'
 	},
 	{
 		rank: 'Tier 3 · analytic',
@@ -63,7 +66,7 @@ export const oracles = [
 	}
 ];
 
-/** What each suite gates, and where it stood at weekly #96. */
+/** What each suite gates, and where it stood at weekly #106. */
 export const suites = [
 	{
 		name: 'QUALIFICATION',
@@ -81,7 +84,7 @@ export const suites = [
 	},
 	{
 		name: 'DSD64 / 128 / 256 / 512',
-		gates: 'DSD decode + measurement at 44.1 and 352.8 kHz out',
+		gates: 'DSD decode + measurement at 44.1 and 352.8 kHz out, the band limit pinned',
 		oracle: 'MAAT, via `dsd2wav` exports',
 		corpus: '8 albums across four rates',
 		latest: 'green'
@@ -160,8 +163,8 @@ export const suites = [
 		name: 'DSD_ROUNDTRIP',
 		gates: 'The `dsd2wav` exporter that produces every DSD reference row',
 		oracle: 'crête vs crête, two-tier',
-		corpus: 'Thriller DSD64',
-		latest: '4.5e-07 dB order statistics'
+		corpus: 'Thriller DSD64 at 44.1 kHz; since 0.22.0 also its shortest track at 352.8 kHz, band-limited and `full`',
+		latest: '3/3, **Δ 0.000**; order statistics to 4.5e-07 dB'
 	},
 	{
 		name: 'SACD',
@@ -193,30 +196,30 @@ export const suites = [
 	}
 ];
 
-/** Everything currently open, with the number attached. Complete as of 0.20.0. */
+/** Everything currently open, with the number attached. Complete as of 0.22.0. */
 export const openItems = [
 	{
 		what: '352.8 kHz DSD carries no parity claim',
 		measure:
-			'DR reads +1…+3 higher than at 44.1 kHz; both tools agree on direction, not magnitude. At 44.1 kHz the continuous per-track DR comparison flags **nothing** on any of the 8 DSD albums — in weekly #77 the only `DR (PMF) raw` flags in the whole run are 3 tracks of `Thriller_DSD64@352800` — and album DR matches on **7 of 8**. The exception is not rate-related: `BoneyM_10k_DSD128@44100` misses a `.5` boundary by **0.020 dB**, which is an accuracy question and no aggregation rule can fix it. At 352.8 kHz `Thriller_DSD64` mismatches at album level *and* on 4 of 9 tracks, maximum integer delta 2.',
+			'Up to 0.21.0 DR read +1…+3 higher at 352.8 kHz than at 44.1 kHz, because the decimation cascade kept the modulator’s shaped ultrasonic noise; in weekly #96 `Thriller_DSD64@352800` mismatched at album level *and* on 4 of 9 tracks, maximum integer delta 2. 0.22.0 band-limits the decode at 50 kHz by default, and in weekly #106 album DR at 352.8 kHz matches the reference on all eight DSD albums; the only DR flag at that rate is one DSD128 track’s DR LEFT, 0.53 against a 0.50 tolerance. It is still not parity. A 50 kHz band keeps 20 to 50 kHz content the 44.1 kHz decode removes, the corner is the same for every DSD rate so DSD256 and DSD512 lose clean content above it, and MAAT computes no loudness at 352.8 kHz at all. At 44.1 kHz the continuous per-track DR comparison flags **nothing** on any of the 8 DSD albums — in weekly #106 the only `DR (PMF) raw` flag in the whole run is a PCM track in SMOKE — and album DR matches on **7 of 8**. The exception is not rate-related: `BoneyM_10k_DSD128@44100` misses a `.5` boundary by **0.020 dB**, which is an accuracy question and no aggregation rule can fix it.',
 		status: 'Documented, deliberate'
 	},
 	{
 		what: 'Min PSR diverges from the reference',
 		measure:
-			'Average |Δ| 0.576 dB across 571 comparisons in weekly #96, max 3.27 — about ten times the next-worst metric, LRA at 0.059. MAAT’s figure was reverse-engineered as a 0.5 dB/s decaying peak-hold; crête implements AES eBrief 373. A decode-versus-formula experiment proved it is a formula difference, not a decode artefact.',
+			'Average |Δ| 0.574 dB across 573 comparisons in weekly #106, max 3.27 — about ten times the next-worst metric, LRA at 0.058. MAAT’s figure was reverse-engineered as a 0.5 dB/s decaying peak-hold; crête implements AES eBrief 373. A decode-versus-formula experiment proved it is a formula difference, not a decode artefact.',
 		status: 'Closed as won’t-fix'
 	},
 	{
 		what: 'Disc audio and SACD have no external oracle',
 		measure:
-			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. DST sits in the same position. For SACD the right comparison is **written** and is the strongest gate in that suite — crête on the ISO must equal crête on the `.dsf` extracted from the same disc, two independent container readers over one decode chain — but it is **not running in CI**: it needs the DSD64 corpus staged beside the SACD one, and wiring that through the corpus-reuse mechanism would make the whole suite skip whenever the sibling was not ready. Those are the 2 skips in its 6-passed / 2-skipped result. DVD is the partial exception: foobar cannot open a `.vob` or `.aob`, but the suite already requires crête through the container to equal crête on the FLAC of the same audio exactly, so foobar measuring that FLAC reaches the container decode transitively — DR9 against DR9 on the DVD-Video LPCM, DR13 against DR13 on the DVD-Audio MLP. That tier was added after weekly #85 and has passed in every weekly since, #86 to #96.',
+			'TrueHD, DTS-HD MA and AC-3 are gated against crête’s own snapshot and against the LPCM carrier of the same master — where every metric matches exactly, with only RMS moving by 1.2e-04 dB from one frame of decoder tail. DST sits in the same position. For SACD the right comparison is **written** and is the strongest gate in that suite — crête on the ISO must equal crête on the `.dsf` extracted from the same disc, two independent container readers over one decode chain — but it is **not running in CI**: it needs the DSD64 corpus staged beside the SACD one, and wiring that through the corpus-reuse mechanism would make the whole suite skip whenever the sibling was not ready. Those are the 2 skips in its 6-passed / 2-skipped result. DVD is the partial exception: foobar cannot open a `.vob` or `.aob`, but the suite already requires crête through the container to equal crête on the FLAC of the same audio exactly, so foobar measuring that FLAC reaches the container decode transitively — DR9 against DR9 on the DVD-Video LPCM, DR13 against DR13 on the DVD-Audio MLP. That tier was added after weekly #85 and has passed in every weekly since, #86 to #106.',
 		status: 'Open, not a blocker'
 	},
 	{
 		what: 'The SACD suite gates drift, not correctness',
 		measure:
-			'Closed since 0.16.1: the reader and the DST decoder had **no automated test of any kind** until 0.17.0, which is uncomfortable for code whose failure mode is silence — each of the three format traps found while writing it produced audible output and a plausible DR. The suite now measures a **reduced** image, 229 MB instead of ~4 GB, every audio sector the disc’s own bytes and only the extent fields of the TOC rewritten; the builder’s `--verify` measures every kept track in both the reduced and the full image and requires identical results, so its own address arithmetic cannot certify its own mistake. **6 passed / 2 skipped** on its first weekly, #77, and in every weekly since, through #96. Until the `.dsf` tier runs, what it gates is drift against recorded values rather than correctness against an oracle.',
+			'Closed since 0.16.1: the reader and the DST decoder had **no automated test of any kind** until 0.17.0, which is uncomfortable for code whose failure mode is silence — each of the three format traps found while writing it produced audible output and a plausible DR. The suite now measures a **reduced** image, 229 MB instead of ~4 GB, every audio sector the disc’s own bytes and only the extent fields of the TOC rewritten; the builder’s `--verify` measures every kept track in both the reduced and the full image and requires identical results, so its own address arithmetic cannot certify its own mistake. **6 passed / 2 skipped** on its first weekly, #77, and in every weekly since, through #106. Until the `.dsf` tier runs, what it gates is drift against recorded values rather than correctness against an oracle.',
 		status: 'Gated, narrowly'
 	},
 	{
@@ -258,13 +261,25 @@ export const openItems = [
 	{
 		what: 'Auro-3D cannot be identified',
 		measure:
-			'FFmpeg reports an Auro carrier as plain DTS-HD MA, so the profile field cannot see it. On the one disc measured the height channels were in the carrier’s low bits — real enough to find, at 803,853 non-zero LFE samples within ±24 against the DTS:X carrier’s exact zero — but reading that is inference, not a bitstream field. If it is ever built it belongs in the confidence-scored forensics namespace, never in the metrics.',
+			'FFmpeg reports an Auro carrier as plain DTS-HD MA, so the profile field cannot see it. On the one disc measured the height channels were in the carrier’s low bits — real enough to find, at 803,853 non-zero LFE samples within ±24 against the DTS:X carrier’s exact zero — but reading that is inference, not a bitstream field. If it is ever built it belongs in the confidence-scored forensics namespace, never in the metrics. A *discrete* Auro-3D file — one PCM channel per speaker — is a different case: it declares its layout in its channel mask, and since 0.21.0 crête labels and weights it from that.',
 		status: 'Not attempted'
+	},
+	{
+		what: 'Masked speaker layouts are gated synthetically',
+		measure:
+			'Since 0.21.0 a file’s declared channel mask decides labels, LFE and weights when it describes a layout the count does not — Auro-3D 8.0 was read as 7.1 before, with a surround taken for an LFE. The weekly corpus holds **no masked file that disagrees with its count**, so the weekly does not exercise the new path: `scripts/check_channel_mask.sh` gates it with synthetic Auro 8.0 and 9.1 files whose loudness is arithmetic. The weights are a stated choice — every height channel at unity — and FFmpeg’s `ebur128` weights the top-back pair +1.5 dB, so on height layouts the two read differently. The DSF channel-type field and the DFF channel chunk are not read yet, so a 4-channel DSF declaring L R C LFE is still measured as quad.',
+		status: 'Open, synthetic only'
+	},
+	{
+		what: 'The DSD round trip shared one measurement key',
+		measure:
+			'0.22.0 gave `DSD_ROUNDTRIP` two 352.8 kHz cases beside the 44.1 kHz one, and all three recorded under the bare album key, so in weekly #106 the 352.8 kHz `full` values overwrote the 44.1 kHz ones in the measurement file and 22 values were counted as moved that had not — `The Girl Is Mine` reading its unfiltered 352.8 kHz DR. The suite itself passed: each case compares within itself. crete-pytest `098ede6` keys the 352.8 kHz cases by rate and bandwidth; the next weekly should show those 22 moving back, and has not run yet.',
+		status: 'Fixed, awaiting a weekly'
 	},
 	{
 		what: 'The 0.19.5 duration guard, confirmed on Linux',
 		measure:
-			'Weekly #87, the first on 0.19.0, and #92, on 0.19.4, both failed the DVD suite’s group-change test with `std::bad_alloc` on the Linux agent: a wrapped MPEG-PS timestamp declared 95 268 s for 12 MB of MLP, and the 0.19.0 decode reserve asked for about 40 GB per channel — which Linux refuses and macOS maps lazily, so the suite had passed on the development Mac. 0.19.5 rejects a duration the file is too small to hold. It was verified on macOS at release — DVD suite 12/12, seven FFmpeg carriers byte-identical with unchanged peak memory — and weekly #93, the first on 0.19.5, is the Linux confirmation: DVD **12/12** on the x86-64 agent, group-change test included, and again in every weekly since, through #96. The DVD suite runs on the x86-64 agent only.',
+			'Weekly #87, the first on 0.19.0, and #92, on 0.19.4, both failed the DVD suite’s group-change test with `std::bad_alloc` on the Linux agent: a wrapped MPEG-PS timestamp declared 95 268 s for 12 MB of MLP, and the 0.19.0 decode reserve asked for about 40 GB per channel — which Linux refuses and macOS maps lazily, so the suite had passed on the development Mac. 0.19.5 rejects a duration the file is too small to hold. It was verified on macOS at release — DVD suite 12/12, seven FFmpeg carriers byte-identical with unchanged peak memory — and weekly #93, the first on 0.19.5, is the Linux confirmation: DVD **12/12** on the x86-64 agent, group-change test included, and again in every weekly since, through #106. The DVD suite runs on the x86-64 agent only.',
 		status: 'Closed, weekly #93'
 	},
 	{
@@ -276,7 +291,7 @@ export const openItems = [
 	{
 		what: 'The packages are smoke-tested, not measured',
 		measure:
-			'Since 0.19.2 `crete` and `crete-gui` are published for openSUSE, Fedora, Debian, Ubuntu and Arch, and the only check inside each package build is that the binary runs and reports the version it was packaged as. The Homebrew `crete` formula, since 0.19.3, carries a test that measures a 20 s 1 kHz sine at −6 dBFS and asserts DR0, a −6.02 dBFS sample peak and −6.01 LUFS — but Homebrew runs it only on `brew test`, not on install. Since 0.19.4 releases are published from Jenkins, which smoke-builds the CLI tier from the release tarball and bumps the tap only after all 15 OBS repositories publish — but it has no macOS agent, so the formulae are never built on a Mac before users get them. The Windows build, since 0.20.0, runs the synthetic self-checks and a JSON round trip on its JSON build; the shipped `crete.exe` is checked only for its version and its DLL imports, and nothing runs `crete-gui.exe`. The Linux packages are built with crête’s own flags — distribution `CFLAGS`, LTO and debug builds all off — so bit-identity with the gated builds holds **by construction, not by comparison**. No figure on this site was measured with a packaged binary: the census is weekly #96, on 0.20.0. The packaged `crete` is the FFmpeg tier without `-f json`.',
+			'Since 0.19.2 `crete` and `crete-gui` are published for openSUSE, Fedora, Debian, Ubuntu and Arch, and the only check inside each package build is that the binary runs and reports the version it was packaged as. The Homebrew `crete` formula, since 0.19.3, carries a test that measures a 20 s 1 kHz sine at −6 dBFS and asserts DR0, a −6.02 dBFS sample peak and −6.01 LUFS — but Homebrew runs it only on `brew test`, not on install. Since 0.19.4 releases are published from Jenkins, which smoke-builds the CLI tier from the release tarball and bumps the tap only after all 15 OBS repositories publish — but it has no macOS agent, so the formulae are never built on a Mac before users get them. The Windows build, since 0.20.0, runs the synthetic self-checks and a JSON round trip on its JSON build; the shipped `crete.exe` is checked only for its version and its DLL imports, and nothing runs `crete-gui.exe`. For 0.22.0 it did not run at all: the agent’s Application Control policy blocked MSYS2’s `bash.exe`, so that release has no Windows zip. The Linux packages are built with crête’s own flags — distribution `CFLAGS`, LTO and debug builds all off — so bit-identity with the gated builds holds **by construction, not by comparison**. No figure on this site was measured with a packaged binary: the census is weekly #106, on 0.22.0. The packaged `crete` is the FFmpeg tier without `-f json`.',
 		status: 'Open'
 	},
 	{
@@ -318,7 +333,7 @@ export const openItems = [
 	{
 		what: 'The new GUI bands were never looked at',
 		measure:
-			'0.16.1’s SACD, cue and stream-picker bands are verified by construction — both front-ends call one collector — and headlessly, which is not the same as having been seen. 0.17.0 adds warnings to that surface without adding a test that anyone looked at them either. The SACD row’s trailing hint is long, so narrow window widths are the case to check. The results-table footer clipping in 0.12.0 is precisely the class of defect a suite cannot catch.',
+			'0.16.1’s SACD, cue and stream-picker bands are verified by construction — both front-ends call one collector — and headlessly, which is not the same as having been seen. 0.17.0 adds warnings to that surface without adding a test that anyone looked at them either. The SACD row’s trailing hint is long, so narrow window widths are the case to check. The results-table footer clipping in 0.12.0 is precisely the class of defect a suite cannot catch. 0.22.0’s BAND control, live at 176.4 and 352.8 kHz only, is compiled and option-checked, not exercised by hand.',
 		status: 'Open'
 	},
 	{

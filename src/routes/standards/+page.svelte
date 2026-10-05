@@ -40,6 +40,33 @@
 			order: [{ t: 'L R C ' }, { t: 'LFE', lfe: true }, { t: ' Lrs Rrs Lss Rss' }]
 		}
 	];
+
+	// Examples of a declared mask the count table cannot express, from the
+	// Crete README's channel-mask table (0.21.0). Any usable mask is read the
+	// same way; these are the ones it names.
+	const masked = [
+		{ mask: '0x2D603', name: '4.0.4 (Auro 8.0)', order: [{ t: 'L R Ls Rs HL HR HLs HRs' }] },
+		{
+			mask: '0x2D60F',
+			name: '5.1.4 (Auro 9.1)',
+			order: [{ t: 'L R C ' }, { t: 'LFE', lfe: true }, { t: ' Ls Rs HL HR HLs HRs' }]
+		},
+		{
+			mask: '0x2FE3F',
+			name: '7.1.6 (Auro 13.1)',
+			order: [
+				{ t: 'L R C ' },
+				{ t: 'LFE', lfe: true },
+				{ t: ' Lrs Rrs Lss Rss T HL HC HR HLs HRs' }
+			]
+		},
+		{
+			mask: '0xFF',
+			name: '7.1 (wide)',
+			order: [{ t: 'L R C ' }, { t: 'LFE', lfe: true }, { t: ' Ls Rs Lc Rc' }]
+		},
+		{ mask: '0x107', name: '4.0', order: [{ t: 'L R C Cs' }] }
+	];
 </script>
 
 <svelte:head>
@@ -216,7 +243,7 @@
 		</div>
 	</section>
 
-	<section class="section">
+	<section class="section" id="channels">
 		<p class="kicker">04 — Channel layouts</p>
 		<h2>Mono through 7.1, on one shared table</h2>
 		<p class="intro">
@@ -254,6 +281,61 @@
 			is untouched by construction, not by measurement.
 		</p>
 
+		<h3 class="mask-head">When the file names its speakers</h3>
+		<div class="cols-tight">
+			<div>
+				<p class="measure">
+					A channel count cannot tell an Auro-3D 8.0 file from a 7.1 one. Up to 0.20.0 crête called it
+					7.1, took its <code>Rs</code> for an LFE and left it out of DR and loudness; Auro 9.1 and
+					larger fell to a bare channel count, with the LFE scored and nothing weighted. Since 0.21.0
+					crête reads the speaker mask a file declares — <code>dwChannelMask</code> in an extensible
+					WAV, RF64 or Wave64, the channel-mask tag in FLAC, FFmpeg's native layout — and takes the
+					labels, the LFE and the weights from it when the mask names one speaker per channel and
+					describes a layout the table above does not.
+				</p>
+				<p class="measure">
+					A mask that agrees with the count, a mono or stereo file, a file with no mask and a mask
+					whose bit count differs from the channel count all take the table's path unchanged:
+					nine Blu-ray, Auro-3D and DTS:X carriers gave identical JSON, and every value in the
+					weekly corpus is bit-identical to 0.20.0. <code>--channel-mask ignore</code> reproduces
+					0.20.0.
+				</p>
+			</div>
+			<div>
+				<p class="measure">
+					The weights on a masked layout are a stated choice: ear-level surrounds, back centre
+					included, at +1.5 dB; front, front-of-centre and every height channel at unity, after
+					BS.1770-4 Table 4, which puts nothing above 30° elevation at +1.5 dB. FFmpeg's
+					<code>ebur128</code> weights the top-back pair +1.5 dB, so on height layouts crête reads
+					slightly lower than it. A masked layout is named floor.lfe.height, as FFmpeg names them.
+				</p>
+				<p class="note">
+					<strong>Not read yet:</strong> the DSF channel-type field and the DFF channel chunk, so a
+					4-channel DSF declaring L R C LFE is still measured as quad. The weekly corpus holds no
+					masked file that disagrees with its count, so the new path is gated by
+					<code>scripts/check_channel_mask.sh</code> instead — synthetic Auro 8.0 and 9.1 files,
+					one tone in every channel, whose loudness is arithmetic.
+				</p>
+			</div>
+		</div>
+		<div class="scroll-x layout-table masked">
+			<table class="table">
+				<thead>
+					<tr><th style="width:18%">mask</th><th style="width:30%">Layout</th><th>Order</th></tr>
+				</thead>
+				<tbody>
+					{#each masked as l (l.mask)}
+						<tr>
+							<td><code>{l.mask}</code></td>
+							<td><strong>{l.name}</strong></td>
+							<td class="order">
+								{#each l.order as part}<span class:lfe={part.lfe}>{part.t}</span>{/each}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 		<div class="cols-tight sub">
 			<div>
 				<h3>Dynamic range past stereo is a chosen rule</h3>
@@ -322,8 +404,8 @@
 			<div>
 				<h2>Min PSR: crête follows the paper, the reference follows a peak-hold</h2>
 				<p class="measure">
-					Min PSR is the worst-agreeing metric in the entire suite — average |Δ| 0.576 dB, max 3.27,
-					roughly ten times the next-worst, in weekly #96. It is also the one metric where that gap is fully
+					Min PSR is the worst-agreeing metric in the entire suite — average |Δ| 0.574 dB, max 3.27,
+					roughly ten times the next-worst, in weekly #106. It is also the one metric where that gap is fully
 					explained and deliberately left alone.
 				</p>
 				<p class="measure">
@@ -488,6 +570,15 @@
 
 	.sub {
 		margin-top: 40px;
+	}
+
+	.mask-head {
+		font-size: 22px;
+		margin: 40px 0 16px;
+	}
+
+	.masked {
+		margin-top: 24px;
 	}
 
 	.sub h3 {

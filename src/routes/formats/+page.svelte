@@ -156,6 +156,12 @@
 					<em>measured</em>, so a file that failed to decode contributes a warning and no track. The
 					run exits <strong>2</strong>.
 				</p>
+				<p class="measure">
+					So a file that is not audio must not be read as damaged audio. Since 0.22.0 a folder scan
+					skips macOS AppleDouble sidecars, the <code>._&lt;name&gt;</code> metadata files a Mac writes
+					next to every file on a USB stick or an SMB share; before, each one was reported as a damaged
+					track and the run exited 2. A sidecar named on the command line is still attempted.
+				</p>
 			</div>
 			<div>
 				<h3>The limit, stated plainly</h3>
@@ -342,6 +348,12 @@ Layout:   7.1 · L R C LFE Lrs Rrs Lss Rss
 						rather than a declared field, so if it is ever built it belongs in a confidence-scored
 						forensics namespace, gated off, never in the metrics.
 					</p>
+					<p class="note">
+						A <em>discrete</em> Auro-3D file is a different case: one PCM channel per speaker, as
+						downloads ship and as the Auro encoder takes them. It declares its layout in its channel
+						mask, and since 0.21.0 crête labels and weights it from that mask —
+						<a href="/standards/#channels">see Standards</a>.
+					</p>
 				</div>
 			</div>
 		</article>
@@ -361,7 +373,7 @@ Layout:   7.1 · L R C LFE Lrs Rrs Lss Rss
 
 	<section class="section">
 		<p class="kicker">05 — DSD</p>
-		<h2>A clean-room decimation kernel, on three declared axes</h2>
+		<h2>A clean-room decimation kernel, on four declared axes</h2>
 		<div class="cols-tight">
 			<div>
 				<p class="measure">
@@ -399,7 +411,10 @@ Layout:   7.1 · L R C LFE Lrs Rrs Lss Rss
 						<tr>
 							<td><code>multistage</code></td>
 							<td>DSD64–512, any filter</td>
-							<td>DSD64–512, <code>default</code> filter only</td>
+							<td>
+								DSD64–512, <code>default</code> filter only; <code>--dsd-bandwidth</code> acts at
+								176400 and 352800
+							</td>
 						</tr>
 						<tr>
 							<td><code>direct</code></td>
@@ -418,26 +433,37 @@ Layout:   7.1 · L R C LFE Lrs Rrs Lss Rss
 			<div>
 				<h3>Read this before quoting a DSD number</h3>
 				<p class="measure">
-					DSD dynamic range depends on the output rate, and only 44.1 kHz carries a parity claim. At
-					352.8 kHz the retained ultrasonic noise-shaping inflates the second-highest block peak far
-					more than it inflates RMS, so DR reads +1 to +3 higher. crête and the reference agree on the
-					direction but not the magnitude, and <strong
-						>every DSD album-level mismatch on record occurs only at that rate</strong
-					>. Unfiltered, the ultrasonic content alone drives the meter past full scale — a sample peak
-					of +1.7 dBFS on one track.
+					DSD dynamic range depends on the output rate, and only 44.1 kHz carries a parity claim. Above
+					48 kHz output the halving cascade alone keeps the modulator's shaped ultrasonic noise, which
+					inflates the second-highest block peak far more than it inflates RMS. Up to 0.21.0, at
+					352.8 kHz, DR read +1 to +3 higher than at 44.1 kHz, and the ultrasonic content alone drove
+					the meter past full scale — a sample peak of +1.7 dBFS on one track.
 				</p>
 				<p class="measure">
-					Results at 88.2 / 176.4 / 352.8 kHz are offered for analysis, not parity. Treat them as a
-					different measurement, not a more precise one. There is deliberately
-					<strong>no band-limiting flag</strong>: it would be a worse version of what the 44.1 kHz path
-					already does.
+					Since 0.22.0 the band limit lives in the decoder: <code>--dsd-bandwidth</code>, a 50 kHz
+					linear-phase low-pass by default, acting at 176.4 and 352.8 kHz. A band-limiting flag had been
+					refused while it would have produced a number no reference implementation could check; in
+					the decoder, the exports the reference measures carry it too, and the 352.8 kHz references
+					were re-recorded with it. DSD64 RMS and DR at 88.2, 176.4 and 352.8 kHz now agree within
+					0.07, every Thriller track is back under full scale, and in weekly #106 album DR at 352.8 kHz
+					matches the reference on all eight DSD albums. <code>--dsd-bandwidth full</code> gives the old
+					numbers back.
+				</p>
+				<p class="measure">
+					It is still not parity. A 50 kHz band keeps 20 to 50 kHz content that the 44.1 kHz decode
+					removes, and the corner is fixed for every DSD rate, so DSD256 and DSD512 lose clean
+					content above 50 kHz. Results at 88.2 / 176.4 / 352.8 kHz are offered for analysis. Treat
+					them as a different measurement, not a more precise one.
 				</p>
 				<h4 class="val-head">Validation</h4>
 				<p class="note">
 					crête on a <code>.dsf</code> and crête on the WAV exported from it agree exactly, because
 					both go through the same decode. Reference rows come from measuring those 32-bit-float
 					exports at a pinned decode configuration, at both 44.1 and 352.8 kHz — so the exporter is
-					load-bearing for the entire DSD corpus, and it has its own gate. The caveat is stated: this
+					load-bearing for the entire DSD corpus, and it has its own gate, which since 0.22.0 also
+					runs at 352.8 kHz with the band limit on and off. Re-recording the 44.1 kHz references on the
+					0.22.0 pipeline reproduced all 1869 July values exactly; the July 352.8 kHz rows are kept as
+					the references for <code>full</code>. The caveat is stated: this
 					validates <em>metrics</em> end to end, not the decimation, whose correctness rests on the library's
 					own golden vectors plus crête's internal parity suites.
 				</p>
@@ -459,7 +485,7 @@ Layout:   7.1 · L R C LFE Lrs Rrs Lss Rss
 				<p class="measure">
 					crête reads the master TOC, both area TOCs, the track list and the audio-sector packet
 					stream, and hands per-channel DSD to the <strong>same decimation chain</strong> every
-					<code>.dsf</code> and <code>.dff</code> goes through. So the three DSD axes above apply
+					<code>.dsf</code> and <code>.dff</code> goes through. So the four DSD axes above apply
 					unchanged, and crête on an ISO must agree with crête on an extracted rip of the same disc —
 					a crête-versus-crête gate that needs no external oracle.
 				</p>
@@ -971,7 +997,9 @@ reconstructed (no open MQA decoder exists).
 					<code>STATIC=1</code>, so there are no DLLs and no installer — keep the
 					<code>fonts</code> folder beside the GUI. The Scoop bucket installs that zip, puts both
 					commands on the path with a Start-menu shortcut for the GUI, and is bumped by the release
-					job. A winget package is prepared; its first submission is made by hand.
+					job. A winget package is prepared; its first submission is made by hand. The 0.22.0 Windows
+					build did not run — the agent's Application Control policy blocked MSYS2's bash — so that
+					release has no zip and the bucket still installs 0.21.0.
 				</p>
 				<p class="measure">
 					Built natively under MSYS2 on a Windows agent. The job runs the synthetic self-checks and a
