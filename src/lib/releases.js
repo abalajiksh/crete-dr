@@ -34,6 +34,22 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.22.0',
+		date: '2026-10-05',
+		impact: ['moves'],
+		title: 'DSD output band limit',
+		body: [
+			'DSD is decoded by the vendored libdsddpcm **0.2.2**, and crête passes its new output band limit explicitly: `--dsd-bandwidth default|full|<Hz>`. Above 48 kHz output the halving cascade alone keeps the DSD modulator’s shaped ultrasonic noise, which inflates RMS, peak and DR. The default appends a linear-phase low-pass with a **50 kHz** corner (Scarlet Book Annex D.1 measurement band; flat to the corner, at least 153 dB down from 1.4 times it, unity DC). It acts at **176.4 and 352.8 kHz** output only: 44.1 kHz (the default rate) and 88.2 kHz are bit-identical to 0.21.0.',
+			'Numbers move only for DSD decoded to 176.4 or 352.8 kHz. On the reference corpus, DSD64 at 352.8 kHz now reads 0.4 to 2.7 dB lower in RMS and 0.4 to 1.9 lower in DR per album than with no band limit; Thriller’s six tracks that went over full scale are all back under it; DSD128 DR moves 0.2 to 0.3; DSD256 and DSD512 are unchanged. DSD64 RMS and DR at 88.2, 176.4 and 352.8 kHz now agree within 0.07. The 352.8 kHz MAAT references were re-recorded through `dsd2wav` with the band limit; the old rows are kept as the `full` references.',
+			'*44.1 kHz remains the parity-guaranteed rate.* A 50 kHz band still keeps 20 to 50 kHz content that the 44.1 kHz decode removes, so 352.8 kHz results are analysis, not parity. The 50 kHz corner is fixed for every DSD rate, so DSD256 and DSD512 lose clean content above 50 kHz.',
+			'`dsd2wav` takes the same flag, the GUI gains a BAND control (live at 176.4 and 352.8 kHz only; compiled and option-checked, not exercised by hand), JSON gains `dsd_bandwidth` and `dsd_bandwidth_applied`, and `--version` shows the bandwidth on the chain line. `scripts/check_dsd_bw.sh` gates the flag with a synthetic DSD64 file.',
+			'Folder scans now skip macOS AppleDouble sidecars (`._<name>`), which a Mac writes next to every file on a USB stick or SMB share and which crête reported as damaged tracks with exit 2. No measured value changes; `scripts/check_appledouble.sh` gates it.',
+			'*About the moved count below:* 22 of the 772 moved values are not a change in crête. The DSD round-trip suite gained 352.8 kHz cases (`default` and `full`, on the shortest Thriller track), and all three of its cases recorded under one key in the measurement file, so the 352.8 kHz `full` values overwrote the 44.1 kHz ones. The real moves are the 750 values at 352.8 kHz in the DSD64/128/256/512 suites; **no 44.1 kHz value moved**. The harness keys the round trip by rate and bandwidth from the next weekly on.',
+			'`--dsd-bandwidth full` gives the 0.21.0 numbers back.',
+			'**Qualified by Crete-Weekly #106** on `6c9a999`: tests: 217 passed, 0 failed, 16 skipped; compared 15,483 values against the references, 64 flagged (0.41 %), 0 catastrophic; against 0.21.0, 772 of 15,439 shared values moved, largest 4.831 (DSD64 / I_Robot_DSD64@352800 / 09 Total Eclipse.dsf / RMS RIGHT).'
+		]
+	},
+	{
 		version: '0.21.0',
 		date: '2026-10-02',
 		impact: ['moves'],
