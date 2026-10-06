@@ -34,6 +34,21 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.22.1',
+		date: '2026-10-07',
+		impact: ['moves'],
+		title: 'SACD frame alignment and exact DSD input rates',
+		body: [
+			'**SACD ISO tracks now start on their first frame.** On an uncompressed (non-DST) area crête read each track from the first byte of its first sector and ignored the packet `frame_start` flag. That sector usually opens with the end of the previous track’s last frame, so the whole track was shifted: it began with a few ms of the previous track and lost as much of its own end, while its duration stayed exact. On Hotel California (UDSACD 2233) tracks 3, 4, 7 and 9 started 336 or 672 bytes per channel early. With the fix all nine tracks are byte-identical to an independent `sacd_extract` extraction, and crête measures the ISO and the extracted `.dsf` files identically on every field. A later `frame_start` that finds the stream off a frame boundary is now an error instead of a measurement.',
+			'Numbers move only on SACD ISO tracks that start mid-frame, and only slightly: at most 8e-3 LU (max momentary), 3.4e-3 LU integrated and 2.2e-4 dB DR on that disc; no integer DR changed. Tracks that start on a frame boundary, DST areas and `.dsf`/`.dff` files are unchanged; the corpus DSOTM image measures identically before and after. A misaligned tail of odd length would also have swapped the stereo channels; none was observed.',
+			'**DSD input rates must be exact.** The rate in a DSF or DFF header was mapped by integer division, so a damaged header claiming e.g. 2850000 Hz was decoded as DSD64 at the wrong rate, with exit 0. Only exact multiples of 44.1 kHz (DSD64/128/256/512) are accepted now. 48 kHz-family DSD (3.072 MHz and its multiples) was already refused; the error now names it. `scripts/check_dsd_rates.sh` gates both with synthetic DSF and DFF files. No supported file’s numbers change.',
+			'*Released as a patch although measured values move:* both changes are reader fixes, so no flag gives back the old reader, and 0.22.0 is how to get the previous numbers. The new `SACD_EXTRACT` suite, which caught the misalignment, ran in this qualification and passes: crête on a reduced Hotel California image equals crête on `sacd_extract`’s `.dsf` of the same tracks, exactly, on x86_64 as on arm64.',
+			'*About the moved count below:* none of the 22 is a change in crête. They are the DSD round-trip values for one Thriller track that 0.22.0 recorded under the wrong key (its 352.8 kHz `full` case overwrote the 44.1 kHz one). With the round trip now keyed by rate and bandwidth, that key holds the 44.1 kHz values again, and the overwritten values reappear unchanged under `@352800/full`. The 848 new values are the 88.2 and 176.4 kHz MAAT comparisons for two albums and the per-rate round-trip cases; those are analysis rates, and DSD parity is still claimed at 44.1 kHz only.',
+			'To get the previous numbers back: `none: reader fix, crête 0.22.0 gives the previous numbers`.',
+			'**Qualified by Crete-Weekly #107** on `ed0c0de`: tests: 227 passed, 0 failed, 16 skipped; compared 16,287 values against the references, 69 flagged (0.42 %), 0 catastrophic; against 0.22.0, 22 of 15,439 shared values moved, largest 4.273 (DSD_ROUNDTRIP / Thriller_DSD64 / 03 The Girl Is Mine (with Paul McCa (Album Ver).dsf / Min. PSR), 848 new.'
+		]
+	},
+	{
 		version: '0.22.0',
 		date: '2026-10-05',
 		impact: ['moves'],
