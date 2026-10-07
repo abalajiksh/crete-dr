@@ -34,6 +34,22 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.22.2',
+		date: '2026-10-07',
+		impact: ['additive'],
+		title: 'Opt-in Dolby DRC for AC-3 and E-AC-3',
+		body: [
+			'**`--dolby-drc` puts a player’s rendition of AC-3/E-AC-3 back on request.** These streams carry Dolby dynamic-range-control metadata, and FFmpeg’s decoder, like most players, applies it by default. crête has measured the encoded audio instead (`drc_scale=0`) since disc audio landed, and that stays the default: `off`. `--dolby-drc on` applies the stream’s DRC as FFmpeg does by default, and `--dolby-drc <scale>` (0 to 6, FFmpeg’s `drc_scale`; `1` is `on`) sets how much. Only `drc_scale` moves; `heavy_compr` (RF mode) and `target_level` stay pinned. Use it to see why crête and a player’s readout differ, not as a measurement: every reference crête is validated against was measured with DRC off, so a DRC-on number has no oracle.',
+			'The gap is mostly in levels, not DR. On a 180 s AC-3 5.1 clip of the DSOTM Blu-ray, `on` moves RMS from -17.96 to -21.98 dBFS and integrated loudness from -16.89 to -21.53 LUFS, while raw DR moves only from 12.71 to 12.91, because DRC pulls down both the peak and the RMS that DR is the difference of.',
+			'Text and detail output label a DRC-on result as a playback rendition. JSON gains `dolby_drc`, the scale applied, in the header and on every AC-3/E-AC-3 track, `0` included, so a result records how it was made. Other codecs (DTS, TrueHD, PCM) ignore the flag and get no key. The GUI has no control for it and always measures the encoded audio.',
+			'*No measured value moves at the default.* Against 0.22.1, text output is identical on AC-3 and TrueHD Atmos clips, and JSON differs only by the new `dolby_drc: 0` on AC-3.',
+			'*A crash was caught before release.* The first qualification weekly found `crete-ffmpeg` segfaulting on every DVD-Video LPCM title: the check for whether a decoder takes `drc_scale` read the private options of a decoder (`pcm_dvd`) that has none. It is fixed in `52e651c`, and the qualification below ran on that commit. SMOKE, DISCAUDIO and DTSX had passed in Crete-Manual (#162 to #164) on the commit before the fix; none of those corpora carries DVD LPCM, which is why they did not see it.',
+			'*Released as a patch although it adds a flag,* which the versioning rule would make a minor. `crete --version` and the new JSON key are the only operator-visible differences at the default.',
+			'To get the previous numbers back: `n/a`.',
+			'**Qualified by Crete-Weekly #109** on `52e651c`: tests: 227 passed, 0 failed, 16 skipped; compared 16,287 values against the references, 69 flagged (0.42 %), 0 catastrophic; against 0.22.1, 16,287 of 16,287 shared values bit-identical.'
+		]
+	},
+	{
 		version: '0.22.1',
 		date: '2026-10-07',
 		impact: ['moves'],
