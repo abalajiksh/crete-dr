@@ -34,6 +34,23 @@
 /** @type {Release[]} */
 export const releases = [
 	{
+		version: '0.23.0',
+		date: '2026-10-07',
+		impact: ['additive'],
+		title: 'MPEG-H and DVD program-stream identification, Auro-3D layout names',
+		body: [
+			'**MPEG-H 3D Audio is identified and refused by name.** No crête build can decode MPEG-H, which is what Sony 360 Reality Audio ships as. `crete-ffmpeg` used to pass on FFmpeg’s "unspecified number of channels" and a `.ts` was not considered at all. crête now reads the container’s own declaration (the MP4 `mhm1`/`mha1` sample entry and its `mhaC`, or the MPEG-2 TS PMT’s stream type `0x2D` and MPEG-H descriptor, 188- and 192-byte packets) and says what the file is: profile, level and CICP reference layout. Checked against all 200 files of Fraunhofer IIS’s MPEG-H transport-layer test set with 0 mismatches. A file that also carries an AAC or AC-3 track is not refused; that track is measured as before.',
+			'**DVD program streams name every stream by the ID the disc gives it.** A new zero-dependency reader, `mpegps.hpp`, walks MPEG packs and PES headers (ITU-T H.222.0 | ISO/IEC 13818-1) and decodes nothing. Unlike FFmpeg’s index, the ID does not move between fragments of a title. The multi-stream warning now reads `measured stream 4 [0xA2]`, detail output gains `Carrier:` and `Measured stream:` lines, JSON gains a per-track `program_stream` object, and the GUI stream picker shows the ID. A new tool, `mpegps-info` (`make mpegps-info`), lists any `.vob`, `.aob` or `.mpg` in any build. The zero-dependency `crete` now names a `.vob` or `.aob` it cannot decode, once per title set with its streams, instead of skipping it in silence; an `.mpg` is named and refused in every build. Checked against ffprobe on all 36 VOB and AOB files of three DVD-Video discs and one DVD-Audio disc: stream IDs, types, codecs, video size and frame rate agree on every one.',
+			'**The compact FFmpeg’s phantom audio stream is gone.** It cannot type a DVD’s MPEG-2 video stream and content-probes it as MP3. Its ID (`0xE0`) says what it is, so it is no longer counted, listed or selectable, and `--stream` on it is refused by name. `audio_stream_count` on a VOB with video drops by one, to the disc’s own count.',
+			'**A `VIDEO_TS` or `AUDIO_TS` folder scan now measures each title set once.** Before, every fragment read the whole set, so a three-fragment title was measured three times and counted three times in the album value, and menu objects (`VIDEO_TS.VOB`, `VTS_NN_0.VOB`, `AUDIO_TS.VOB`, `AUDIO_SV.VOB`) were metered as tracks. They are now skipped with a note. *This changes the album value of a DVD folder scan, and the old one was wrong.* No flag reproduces it. IMPACT is `additive` because no qualified value can move: explicit file arguments are unchanged and the DVD suite names its fragments.',
+			'**Discrete Auro-3D layouts are named where the mask is Auro’s alone.** 8.0, 10.1, 11.1 (5.1 + Top + 5 heights), 12.1 and 13.1 now read `Auro-3D 13.1 layout` on the layout line and as `layout_name` in JSON. Auro 9.1 and the 7.1 + 4H form of 11.1 are deliberately not named: their masks are speaker for speaker 5.1.4 and 7.1.4, and an Atmos bed rendered to either would otherwise be called Auro-3D. Descriptive only; no weight or label depends on it.',
+			'*No measured value moves on any input given as a file.* Whole-JSON output is identical to 0.22.2 on VOB, AOB, the DSOTM Blu-ray FLAC carriers, the Schnittke DTS:X, TrueHD and Auro carriers, DSF, AAC and a non-DVD folder, apart from the warning text and the phantom count above. All self-checks pass on both tiers, including the new `check_mpegh.sh` and `check_mpegps.sh`, and both new parsers were mutation-fuzzed clean under ASan and UBSan.',
+			'*Caveats.* The GUI changes (stream IDs in the picker, the carrier line) are compiled in both tiers but were not checked on screen. A title set’s stream list is read from its first 32 MB, and JSON records how much was read. The DVD private_stream_1 sub-stream ranges are not in H.222.0; they are community-sourced, labelled so in the code, and were checked against ffprobe rather than taken on trust. MPEG-H is identified, not measured.',
+			'To get the previous numbers back: `n/a`.',
+			'**Qualified by Crete-Weekly #110** on `ef55e7e`: tests: 227 passed, 0 failed, 16 skipped; compared 16,287 values against the references, 69 flagged (0.42 %), 0 catastrophic; against 0.22.2, 16,287 of 16,287 shared values bit-identical.'
+		]
+	},
+	{
 		version: '0.22.2',
 		date: '2026-10-07',
 		impact: ['additive'],
